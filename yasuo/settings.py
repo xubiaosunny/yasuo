@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     # Local Apps
     'db',
+    'api',
 ]
 
 REST_FRAMEWORK = {

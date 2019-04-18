@@ -9,6 +9,8 @@ verify_ssl = true
 django = "*"
 djangorestframework = "*"
 mysqlclient = "*"
+coreapi = "*"
+coreapi-cli = "*"
 
 [requires]
 python_version = "3.7"
