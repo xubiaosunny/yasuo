@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+from django.utils.translation import gettext_lazy as _
 from . import config
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -60,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
 ]
 
 ROOT_URLCONF = 'yasuo.urls'
@@ -107,6 +109,15 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTH_USER_MODEL = 'db.CustomUser'
+
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'locale'),
+)
+
+LANGUAGES = [
+    ('en', _('English')),
+    ('zh-Hans', _('Chinese')),
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
