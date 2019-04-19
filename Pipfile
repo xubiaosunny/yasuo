@@ -11,6 +11,8 @@ djangorestframework = "*"
 mysqlclient = "*"
 coreapi = "*"
 coreapi-cli = "*"
+markdown = "*"
+pygments = "*"
 
 [requires]
 python_version = "3.7"
