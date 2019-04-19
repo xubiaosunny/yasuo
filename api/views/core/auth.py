@@ -1,13 +1,16 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import generics
 
 from api.serializer.auth import LoginSerializer
+from shared.common.response import *
 
 
-class TokenView(generics.ListCreateAPIView):
+class LoginView(generics.CreateAPIView):
     serializer_class = LoginSerializer
 
     def post(self, request):
-        content = {'message': 'Hello, World!'}
-        return Response(content)
+        serializer = LoginSerializer(data=request.data)
+        if not serializer.is_valid():
+            print(serializer.errors)
+            return response_400(serializer.errors)
+        return response_200(None)
+

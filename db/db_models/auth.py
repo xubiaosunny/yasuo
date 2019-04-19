@@ -37,7 +37,7 @@ class CustomUserManager(BaseUserManager):
 
 
 class CustomUser(AbstractBaseUser):
-    phone = models.CharField(_('phone'), max_length=100, unique=True)
+    phone = models.CharField(_('Phone'), max_length=100, unique=True)
     name = models.CharField(_('name'), max_length=255, blank=True)
     is_active = models.BooleanField(_('active'), default=True, blank=True)
     is_admin = models.BooleanField(_('staff status'), default=False, blank=True)
@@ -71,3 +71,20 @@ class CustomUser(AbstractBaseUser):
 
     def get_username(self):
         return self.name or self.phone
+
+
+class SMSCode(models.Model):
+    phone = models.CharField(_('Phone'), max_length=100, db_index=True)
+    code = models.CharField(_('SMS Code'), max_length=20)
+    send_time = models.DateTimeField(_('Send Time'), default=timezone.now)
+
+    def is_expired(self):
+        # a code will be invalid after 5 minutes
+        return (timezone.now() - self.send_time).seconds > 300
+
+    @staticmethod
+    def is_invalid(phone):
+        code_records = SMSCode.objects.filter(phone=phone)
+        if code_records.count() == 0:
+            return True
+        return code_records.order_by('-id').first().is_expired()

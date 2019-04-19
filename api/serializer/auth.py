@@ -1,11 +1,18 @@
 from rest_framework import serializers
 from django.utils.translation import gettext as _
-from db.models import CustomUser
+from db.models import CustomUser, SMSCode
+from shared.common.validators import is_chinese_phone_number
 
 
-class LoginSerializer(serializers.ModelSerializer):
+class PhoneSerializer(serializers.Serializer):
+    phone = serializers.CharField(help_text=_('Phone Number'), validators=[is_chinese_phone_number])
+
+
+class LoginSerializer(PhoneSerializer):
     sms_code = serializers.CharField(help_text=_('SMS Code'))
 
-    class Meta:
-        model = CustomUser
-        fields = ['phone', 'sms_code']
+    def validate_sms_code(self, value):
+        phone = self.initial_data['phone']
+        if SMSCode.is_invalid(phone):
+            raise serializers.ValidationError(_('The verification code is incorrect or has expired'))
+        return value

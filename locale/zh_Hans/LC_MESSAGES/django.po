@@ -21,7 +21,7 @@ msgstr ""
 msgid "SMS Code"
 msgstr "短信验证码"
 
-msgid "phone"
+msgid "Phone Number"
 msgstr "手机号码"
 
 msgid "province"
@@ -32,3 +32,9 @@ msgstr "英文"
 
 msgid "Chinese"
 msgstr "中文"
+
+msgid "The phone number is incorrect"
+msgstr "手机号码不正确"
+
+msgid "The verification code is incorrect or has expired"
+msgstr "验证码不正确或者已过期"
