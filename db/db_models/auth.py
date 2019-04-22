@@ -74,9 +74,12 @@ class CustomUser(AbstractBaseUser):
 
 
 class SMSCode(models.Model):
-    phone = models.CharField(_('Phone'), max_length=100, db_index=True)
+    phone = models.CharField(_('Phone'), max_length=100)
     code = models.CharField(_('SMS Code'), max_length=20)
     send_time = models.DateTimeField(_('Send Time'), default=timezone.now)
+
+    class Meta:
+        index_together = ["phone", "send_time"]
 
     def is_expired(self):
         # a code will be invalid after 5 minutes
@@ -88,3 +91,11 @@ class SMSCode(models.Model):
         if code_records.count() == 0:
             return True
         return code_records.order_by('-id').first().is_expired()
+
+    @staticmethod
+    def get_last_in_one_minutes(phone):
+        filter_time = timezone.now() - timezone.timedelta(minutes=1)
+        code_records = SMSCode.objects.filter(phone=phone, send_time__gt=filter_time)
+        if code_records.count() == 0:
+            return None
+        return code_records.order_by('-id').first()
