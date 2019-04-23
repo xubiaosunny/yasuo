@@ -89,7 +89,6 @@ class SMSCode(models.Model):
     def is_invalid(phone, code):
         code_records = SMSCode.objects.filter(phone=phone)
         if code_records.count() == 0:
-            print(1)
             return True
         last_record = code_records.order_by('-id').first()
         return last_record.is_expired() or last_record.code != code
