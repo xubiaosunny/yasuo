@@ -1,21 +1,28 @@
 from rest_framework.response import Response
-
-
-def _response_20x(data=None, status=200):
-    return Response(data, status=status)
+from rest_framework.status import (
+    HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
+    HTTP_200_OK,
+    HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT
+)
 
 
 def response_200(data):
-    return _response_20x(data, status=200)
+    return Response(data, status=HTTP_200_OK)
 
 
 def response_201(data):
-    return _response_20x(data, status=201)
+    return Response(data, status=HTTP_201_CREATED)
 
 
 def response_204(data):
-    return _response_20x(data, status=204)
+    return Response(data, status=HTTP_204_NO_CONTENT)
 
 
 def response_400(data, msg='Invalid Params'):
-    return Response({"msg": msg, "detail": data}, status=400)
+    return Response({"msg": msg, "detail": data}, status=HTTP_400_BAD_REQUEST)
+
+
+def response_404(msg='Not Found'):
+    return Response({"msg": msg}, status=HTTP_404_NOT_FOUND)

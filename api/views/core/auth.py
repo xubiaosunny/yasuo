@@ -1,4 +1,6 @@
 from rest_framework import generics
+from rest_framework.permissions import AllowAny
+from rest_framework.authtoken.models import Token
 
 from api.serializer.auth import LoginSerializer, PhoneSerializer
 from shared.common.response import *
@@ -8,6 +10,7 @@ from shared.core.sms import CloopenSMS
 
 class SendCodeView(generics.CreateAPIView):
     serializer_class = PhoneSerializer
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         serializer = PhoneSerializer(data=request.data)
@@ -35,9 +38,12 @@ class SendCodeView(generics.CreateAPIView):
 
 class LoginView(generics.CreateAPIView):
     serializer_class = LoginSerializer
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if not serializer.is_valid():
             return response_400(serializer.errors)
-        return response_200(None)
+        user, flag = CustomUser.objects.get_or_create(phone=serializer.data['phone'])
+        token, flag = Token.objects.get_or_create(user=user)
+        return response_200({'token': token.key})

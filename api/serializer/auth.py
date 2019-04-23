@@ -13,6 +13,6 @@ class LoginSerializer(PhoneSerializer):
 
     def validate_sms_code(self, value):
         phone = self.initial_data['phone']
-        if SMSCode.is_invalid(phone):
+        if SMSCode.is_invalid(phone, value):
             raise serializers.ValidationError(_('The verification code is incorrect or has expired'))
         return value

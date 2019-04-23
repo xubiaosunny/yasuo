@@ -86,11 +86,13 @@ class SMSCode(models.Model):
         return (timezone.now() - self.send_time).seconds > 300
 
     @staticmethod
-    def is_invalid(phone):
+    def is_invalid(phone, code):
         code_records = SMSCode.objects.filter(phone=phone)
         if code_records.count() == 0:
+            print(1)
             return True
-        return code_records.order_by('-id').first().is_expired()
+        last_record = code_records.order_by('-id').first()
+        return last_record.is_expired() or last_record.code != code
 
     @staticmethod
     def get_last_in_one_minutes(phone):
