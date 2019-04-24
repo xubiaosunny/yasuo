@@ -38,3 +38,45 @@ msgstr "手机号码不正确"
 
 msgid "The verification code is incorrect or has expired"
 msgstr "验证码不正确或者已过期"
+
+msgid "Teacher"
+msgstr "老师"
+
+msgid "Student"
+msgstr "学生"
+
+msgid "grade ten"
+msgstr "高一"
+
+msgid "grade eleven"
+msgstr "高二"
+
+msgid "grade twelve"
+msgstr "高三"
+
+msgid "return students"
+msgstr "复读"
+
+msgid "ID Number"
+msgstr "身份证号"
+
+msgid "Certified File"
+msgstr "证明文件"
+
+msgid "Verifying"
+msgstr "审核中"
+
+msgid "Pass"
+msgstr "通过"
+
+msgid "Reject"
+msgstr "拒绝"
+
+msgid "Work Place"
+msgstr "工作单位"
+
+msgid "Reject Cause"
+msgstr "拒绝原因"
+
+msgid "Full Name"
+msgstr "姓名"

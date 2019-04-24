@@ -37,18 +37,41 @@ class CustomUserManager(BaseUserManager):
 
 
 class CustomUser(AbstractBaseUser):
-    phone = models.CharField(_('Phone'), max_length=100, unique=True)
-    name = models.CharField(_('name'), max_length=255, blank=True)
+    ROLE_CHOICES = (
+        ('T', _('Teacher')),
+        ('S', _('Student')),
+    )
+    GRADE_CHOICES = (
+        ('10', _('grade ten')),
+        ('11', _('grade eleven')),
+        ('12', _('grade twelve')),
+        ('13', _('return students')),
+    )
+
+    phone = models.CharField(_('Phone Number'), max_length=100, unique=True)
+    full_name = models.CharField(_('Full Name'), max_length=255, blank=True)
     is_active = models.BooleanField(_('active'), default=True, blank=True)
     is_admin = models.BooleanField(_('staff status'), default=False, blank=True)
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now, blank=True)
 
+    role = models.CharField(choices=ROLE_CHOICES, max_length=5, null=True, blank=True)
     province = models.CharField(_('province'), max_length=100, null=True, blank=True)
     city = models.CharField(_('province'), max_length=100, null=True, blank=True)
+
+    # student info
+    grade = models.IntegerField(choices=GRADE_CHOICES, null=True, blank=True)
+
+    # teacher info
+    work_place = models.CharField(_('Work Place'), max_length=255, default='', blank=True)
 
     objects = CustomUserManager()
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = []
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['is_admin', 'role']),
+        ]
 
     def __str__(self):
         return '%s %s' % (self.name, self.phone)
@@ -70,7 +93,22 @@ class CustomUser(AbstractBaseUser):
         return self.is_admin
 
     def get_username(self):
-        return self.name or self.phone
+        return self.full_name or self.phone
+
+
+class Certification(models.Model):
+    STATUS_CHOICES = (
+        ('Verifying', _('Verifying')),
+        ('Pass', _('Pass')),
+        ('Reject', _('Reject')),
+    )
+    user = models.OneToOneField(CustomUser, on_delete=models.SET_NULL, null=True)
+    id_number = models.CharField(_('ID Number'), max_length=100)
+    certified_file = models.CharField(_('Certified File'), max_length=100)
+    status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=20)
+    reject_cause = models.TextField(_('Reject Cause'))
+    create_time = models.DateTimeField(_('Create Time'), auto_now_add=True, blank=True)
+    update_time = models.DateTimeField(_('Update Time'), auto_now=True, blank=True)
 
 
 class SMSCode(models.Model):
@@ -79,7 +117,9 @@ class SMSCode(models.Model):
     send_time = models.DateTimeField(_('Send Time'), default=timezone.now)
 
     class Meta:
-        index_together = ["phone", "send_time"]
+        indexes = [
+            models.Index(fields=["phone", "send_time"]),
+        ]
 
     def is_expired(self):
         # a code will be invalid after 5 minutes
