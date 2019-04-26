@@ -1,6 +1,6 @@
 from django.urls import path
 
-from api.views.core import auth
+from api.views import auth
 
 urlpatterns = [
     path('auth/send_sms_code/', auth.SendCodeView.as_view()),

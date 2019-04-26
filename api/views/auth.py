@@ -1,6 +1,7 @@
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
 from rest_framework.authtoken.models import Token
+from django.forms.models import model_to_dict
 
 from api.serializer.auth import LoginSerializer, PhoneSerializer
 from shared.common.response import *
@@ -46,4 +47,9 @@ class LoginView(generics.CreateAPIView):
             return response_400(serializer.errors)
         user, flag = CustomUser.objects.get_or_create(phone=serializer.data['phone'])
         token, flag = Token.objects.get_or_create(user=user)
-        return response_200({'token': token.key})
+        data = {
+            'token': token.key,
+            'user_info': model_to_dict(user),
+            # 'certification': model_to_dict(user.certification_set) if user.certification_set else None
+        }
+        return response_200(data)
