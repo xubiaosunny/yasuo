@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.utils.translation import gettext as _
 from db.models import CustomUser, SMSCode
-from shared.common.validators import is_chinese_phone_number
+from utils.common.validators import is_chinese_phone_number
 
 
 class PhoneSerializer(serializers.Serializer):

@@ -4,9 +4,9 @@ from rest_framework.authtoken.models import Token
 from django.forms.models import model_to_dict
 
 from api.serializer.auth import LoginSerializer, PhoneSerializer
-from shared.common.response import *
+from utils.common.response import *
 from db.models import CustomUser, SMSCode
-from shared.core.sms import CloopenSMS
+from utils.core.sms import CloopenSMS
 
 
 class SendCodeView(generics.CreateAPIView):
