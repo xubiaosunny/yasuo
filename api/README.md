@@ -59,3 +59,45 @@ api遵循rest设计规范
 ```
 Authorization: Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b
 ```
+
+## Signature认证
+
+```java
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+
+public class SignatureHelper {
+    private static final String SALT = "f$)+n6&a0)t2x6ccz!5ko1%rtsry1)9_xug2e+1#er%r)6g*)w";
+    public static String getMD5(String content) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            digest.update(SALT.getBytes());
+            digest.update(content.getBytes());
+            return getHashString(digest);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String getMD5WithSalt(String content) {
+        return getMD5(getMD5(content) + SALT);
+    }
+
+    private static String getHashString(MessageDigest digest) {
+        StringBuilder builder = new StringBuilder();
+        for (byte b : digest.digest()) {
+            builder.append(Integer.toHexString((b >> 4) & 0xf));
+            builder.append(Integer.toHexString(b & 0xf));
+        }
+        return builder.toString();
+    }
+    public static void main (String[] args) {
+        String s = getMD5WithSalt("/api/auth/send_sms_code/");
+	    String ss = getMD5("/api/auth/send_sms_code/");
+        System.out.println(s);
+	    System.out.println(ss);
+    }
+}
+```
