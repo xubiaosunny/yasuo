@@ -7,11 +7,12 @@ from api.serializer.auth import LoginSerializer, PhoneSerializer
 from utils.common.response import *
 from db.models import CustomUser, SMSCode
 from utils.core.sms import CloopenSMS
+from utils.common.permissions import SignaturePermission
 
 
 class SendCodeView(generics.CreateAPIView):
     serializer_class = PhoneSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (SignaturePermission,)
 
     def post(self, request):
         serializer = PhoneSerializer(data=request.data)
