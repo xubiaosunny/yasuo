@@ -1,18 +1,21 @@
 from rest_framework import generics
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from django.forms.models import model_to_dict
 
-from api.serializer.auth import LoginSerializer, PhoneSerializer
+from api.serializer.auth import LoginSerializer, PhoneSerializer, CertificationSerializer
 from utils.common.response import *
 from db.models import CustomUser, SMSCode
 from utils.core.sms import CloopenSMS
 from utils.common.permissions import SignaturePermission
 
 
-class SendCodeView(generics.CreateAPIView):
+class SendCodeView(generics.GenericAPIView):
+    """
+    发送验证码
+    """
     serializer_class = PhoneSerializer
-    permission_classes = (SignaturePermission,)
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         serializer = PhoneSerializer(data=request.data)
@@ -38,7 +41,10 @@ class SendCodeView(generics.CreateAPIView):
         return code
 
 
-class LoginView(generics.CreateAPIView):
+class LoginView(generics.GenericAPIView):
+    """
+    登陆
+    """
     serializer_class = LoginSerializer
     permission_classes = (AllowAny,)
 
@@ -50,7 +56,18 @@ class LoginView(generics.CreateAPIView):
         token, flag = Token.objects.get_or_create(user=user)
         data = {
             'token': token.key,
-            'user_info': model_to_dict(user),
+            'user_info': model_to_dict(user, exclude=['password']),
             # 'certification': model_to_dict(user.certification_set) if user.certification_set else None
         }
         return response_200(data)
+
+
+class CertificationView(generics.GenericAPIView):
+    """
+    认证信息
+    """
+    serializer_class = CertificationSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        return response_200({})

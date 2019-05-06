@@ -58,6 +58,9 @@ class CustomUser(AbstractBaseUser):
     province = models.CharField(_('province'), max_length=100, null=True, blank=True)
     city = models.CharField(_('province'), max_length=100, null=True, blank=True)
 
+    follow = models.ManyToManyField('self')
+    credit = models.DecimalField(max_digits=19, decimal_places=3, default=0)
+
     # student info
     grade = models.IntegerField(choices=GRADE_CHOICES, null=True, blank=True)
 
