@@ -27,6 +27,9 @@ msgstr "手机号码"
 msgid "province"
 msgstr "省"
 
+msgid "city"
+msgstr "城市"
+
 msgid "English"
 msgstr "英文"
 

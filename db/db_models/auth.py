@@ -56,9 +56,9 @@ class CustomUser(AbstractBaseUser):
 
     role = models.CharField(choices=ROLE_CHOICES, max_length=5, null=True, blank=True)
     province = models.CharField(_('province'), max_length=100, null=True, blank=True)
-    city = models.CharField(_('province'), max_length=100, null=True, blank=True)
+    city = models.CharField(_('city'), max_length=100, null=True, blank=True)
 
-    follow = models.ManyToManyField('self')
+    follow = models.ManyToManyField('self', symmetrical=False)
     credit = models.DecimalField(max_digits=19, decimal_places=3, default=0)
 
     # student info
@@ -77,7 +77,7 @@ class CustomUser(AbstractBaseUser):
         ]
 
     def __str__(self):
-        return '%s %s' % (self.name, self.phone)
+        return '%s %s' % (self.full_name, self.phone)
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"

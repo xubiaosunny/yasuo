@@ -8,4 +8,5 @@ urlpatterns = [
     path('auth/certification/', auth.CertificationView.as_view()),
 
     path('user/info/', user.UserInfoView.as_view()),
+    path('user/follow/', user.UserFollowView.as_view()),
 ]
