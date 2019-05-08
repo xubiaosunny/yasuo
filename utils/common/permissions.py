@@ -1,16 +1,23 @@
 from rest_framework.permissions import BasePermission
 import hashlib
+import datetime
 
 from yasuo.config import ACCESS_KEY
 
 
 class SignaturePermission(BasePermission):
     def has_permission(self, request, view):
-        signature = str(request.META.get('HTTP_AUTHORIZATION', None))
-        date = request.META.get('HTTP_DATE', None)  # '%a, %d %b %Y %H:%M:%S GMT'
-        if signature is None or date is None:
+        # "Signature xxxxxxxxxxx %Y-%m-%dT%H:%M:%S"
+        authentication = str(request.META.get('HTTP_AUTHORIZATION', None))
+        try:
+            authentication_type, signature, date_str = authentication.split(" ", maxsplit=2)
+            datetime.datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S')
+        except Exception:
             return False
-        m = hashlib.md5(ACCESS_KEY.encode('utf-8'))
+        if authentication_type != "Signature":
+            return False
+        m = hashlib.md5()
+        m.update(ACCESS_KEY.encode('utf-8'))
         m.update(request.path.encode('utf-8'))
-        m.update(date.encode('utf-8'))
+        m.update(date_str.encode('utf-8'))
         return signature == m.hexdigest()

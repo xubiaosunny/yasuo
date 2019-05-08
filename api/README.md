@@ -62,18 +62,34 @@ Authorization: Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b
 
 ## Signature认证
 
+为防止api被人滥用，部分接口(如发短信)会进行Signature认证，请求需Signature认证的接口时需添如下类似header
+
+```
+Authorization: Signature 337f3fbccf03bada424fbb78b13107df 2019-05-08T10:26:00
+```
+
+认证内容分为三部分(认证方式 签名 日期)，中间使用空格隔开
+
+日期使用UTC时间，格式方式为`yyyy-MM-dd'T'HH:mm:ss`
+
+如下为生成签名的java示例代码
+
 ```java
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
+import java.text.SimpleDateFormat;
+ 
 
 public class SignatureHelper {
-    private static final String SALT = "f$)+n6&a0)t2x6ccz!5ko1%rtsry1)9_xug2e+1#er%r)6g*)w";
-    public static String getMD5(String content) {
+    private static final String ACCESS_KEY = "f$)+n6&a0)t2x6ccz!5ko1%rtsry1)9_xug2e+1#er%r)6g*)w";
+    public static String getSignature() {
+        String time = getDate();
+        String url = "/api/auth/send_sms_code/";
         try {
             MessageDigest digest = MessageDigest.getInstance("MD5");
-            digest.update(SALT.getBytes());
-            digest.update(content.getBytes());
+            digest.update(ACCESS_KEY.getBytes());
+            digest.update(url.getBytes());
+            digest.update(time.getBytes());
             return getHashString(digest);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -81,10 +97,24 @@ public class SignatureHelper {
         return null;
     }
 
-    public static String getMD5WithSalt(String content) {
-        return getMD5(getMD5(content) + SALT);
+    public static String getDate() {
+        final java.util.Calendar cal = java.util.Calendar.getInstance(); 
+		// System.out.println(cal.getTime());
+		//2、取得时间偏移量：  
+		final int zoneOffset = cal.get(java.util.Calendar.ZONE_OFFSET); 
+		// System.out.println(zoneOffset);
+		//3、取得夏令时差：  
+		final int dstOffset = cal.get(java.util.Calendar.DST_OFFSET);  
+		// System.out.println(dstOffset);
+		//4、从本地时间里扣除这些差量，即可以取得UTC时间：  
+        cal.add(java.util.Calendar.MILLISECOND, -(zoneOffset + dstOffset)); 
+        // System.err.println(cal.getTime());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        String time = format.format(cal.getTime());
+        System.err.println(time);
+        return time;
     }
-
+ 
     private static String getHashString(MessageDigest digest) {
         StringBuilder builder = new StringBuilder();
         for (byte b : digest.digest()) {
@@ -94,10 +124,9 @@ public class SignatureHelper {
         return builder.toString();
     }
     public static void main (String[] args) {
-        String s = getMD5WithSalt("/api/auth/send_sms_code/");
-	    String ss = getMD5("/api/auth/send_sms_code/");
+        String s = getSignature();
         System.out.println(s);
-	    System.out.println(ss);
+
     }
 }
 ```
