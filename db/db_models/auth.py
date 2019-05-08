@@ -4,6 +4,7 @@ from django.contrib.auth.models import (
 )
 
 from django.utils import timezone
+from django.forms.models import model_to_dict
 from django.utils.translation import gettext as _
 
 
@@ -97,6 +98,13 @@ class CustomUser(AbstractBaseUser):
 
     def get_username(self):
         return self.full_name or self.phone
+
+    def to_dict(self, detail=False):
+        data = model_to_dict(self, exclude=['password', 'follow'])
+        if detail:
+            data['my_follow'] = [u.to_dict() for u in self.follow.all()],
+            data['follow_me'] = [u.to_dict() for u in self.customuser_set.all()]
+        return data
 
 
 class Certification(models.Model):

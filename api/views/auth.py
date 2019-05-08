@@ -56,7 +56,7 @@ class LoginView(generics.GenericAPIView):
         token, flag = Token.objects.get_or_create(user=user)
         data = {
             'token': token.key,
-            'user_info': model_to_dict(user, exclude=['password']),
+            'user_info': user.to_dict()
             # 'certification': model_to_dict(user.certification_set) if user.certification_set else None
         }
         return response_200(data)

@@ -10,11 +10,9 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
 
 class UserFollowSerializer(serializers.Serializer):
-    user = serializers.IntegerField()
+    user_id = serializers.IntegerField()
 
     def validate_user(self, value):
-        try:
-            user = CustomUser.objects.get(pk=value)
-        except:
+        if not CustomUser.objects.filter(pk=value).exists():
             raise serializers.ValidationError(_('user not exist'))
         return value
