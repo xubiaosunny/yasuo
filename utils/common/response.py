@@ -8,8 +8,11 @@ from rest_framework.status import (
 )
 
 
+# def response_200(data):
+#     return Response(data, status=HTTP_200_OK)
+
 def response_200(data):
-    return Response(data, status=HTTP_200_OK)
+    return Response({'code': 200, 'data': data}, status=HTTP_200_OK)
 
 
 def response_201(data):
@@ -20,8 +23,11 @@ def response_204(data):
     return Response(data, status=HTTP_204_NO_CONTENT)
 
 
-def response_400(data, msg='Invalid Params'):
-    return Response({"msg": msg, "detail": data}, status=HTTP_400_BAD_REQUEST)
+# def response_400(data, msg='Invalid Params'):
+#     return Response({"msg": msg, "detail": data}, status=HTTP_400_BAD_REQUEST)
+
+def response_400(data):
+    return Response({'code': 400, "detail": data}, status=HTTP_200_OK)
 
 
 def response_404(msg='Not Found'):
