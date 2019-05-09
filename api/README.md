@@ -72,6 +72,8 @@ Authorization: Signature 337f3fbccf03bada424fbb78b13107df 2019-05-08T10:26:00
 
 日期使用UTC时间，格式方式为`yyyy-MM-dd'T'HH:mm:ss`
 
+生成签名的方式：取 `ACCESS_KEY`+URI+时间字符串 的MD5
+
 如下为生成签名的java示例代码
 
 ```java
