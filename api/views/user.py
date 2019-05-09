@@ -1,10 +1,27 @@
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from api.serializer.user import UserInfoSerializer, UserFollowSerializer
 from utils.common.response import *
 from db.db_models.auth import CustomUser
+from db.const import CITY
 
+
+class UserCityView(generics.GenericAPIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        """
+        获取城市列表, 如果传入`province`参数则返回对应省份的城市列表，不传则返回所有省份对应的城市列表
+        """
+        province = request.data.get('province', None)
+        if province is None:
+            data = [{"name": k, "city": v} for k, v in CITY.items()]
+            data.sort(key=lambda x: x['name'])
+        else:
+            data = CITY.get(province, [])
+
+        return response_200(data)
 
 class UserInfoView(generics.GenericAPIView):
     """
@@ -20,6 +37,7 @@ class UserInfoView(generics.GenericAPIView):
         return response_200(request.user.to_dict())
 
     def patch(self, request):
+        """更新用户信息"""
         serializer = UserInfoSerializer(data=request.data)
         if not serializer.is_valid():
             return response_400(serializer.errors)

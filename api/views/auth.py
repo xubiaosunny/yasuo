@@ -41,7 +41,7 @@ class SendCodeView(generics.GenericAPIView):
         return code
 
 
-class LoginView(generics.GenericAPIView):
+class TokenView(generics.GenericAPIView):
     """
     登陆
     """
@@ -60,6 +60,12 @@ class LoginView(generics.GenericAPIView):
             # 'certification': model_to_dict(user.certification_set) if user.certification_set else None
         }
         return response_200(data)
+
+    def delete(self, request):
+        """退出登陆"""
+        if request.user.is_authenticated:
+            Token.objects.filter(user=request.user).delete()
+        return response_200({})
 
 
 class CertificationView(generics.GenericAPIView):
