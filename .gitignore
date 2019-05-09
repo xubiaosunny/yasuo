@@ -110,3 +110,4 @@ db.sqlite3
 yasuo/config.py
 .idea/*
 .vscode/*
+status/*
