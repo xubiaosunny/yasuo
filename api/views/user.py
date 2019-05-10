@@ -25,6 +25,7 @@ class UserCityView(generics.GenericAPIView):
 
         return response_200(data)
 
+
 class UserInfoView(generics.GenericAPIView):
     """
     用户信息
