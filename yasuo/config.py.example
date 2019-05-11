@@ -12,3 +12,16 @@ DATABASES = {
         'PASSWORD': '',
     }
 }
+
+SMS_CLOOPEN = {
+    'accountSid': '',
+    'accountToken': '',
+    'appId': '',
+    'serverIP': '',
+    'serverPort': '',
+    'softVersion': '',
+}
+
+ACCESS_KEY = ''
+
+SITE_DOMAIN = 'http://127.0.0.1:8000'

@@ -13,5 +13,15 @@ def file_path(instance, filename):
 class LocalStorage(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
     type = models.CharField(_('File Type'), max_length=50)
-    file = models.FileField(_('File'), upload_to=file_path)
+    file = models.FileField(_('File'), upload_to='storage')
     create_time = models.DateTimeField(_('Create Time'), auto_now_add=True, blank=True)
+
+    def details(self):
+        data = dict()
+        data['id'] = self.id
+        data['user_id'] = self.user_id
+        data['type'] = self.type
+        data['name'] = self.file.name
+        data['url'] = self.file.url
+        data['create_time'] = self.create_time
+        return data

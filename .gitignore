@@ -111,3 +111,4 @@ yasuo/config.py
 .idea/*
 .vscode/*
 status/*
+media/*
