@@ -65,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    # 'utils.common.middleware.DebugMiddleware',
 ]
 
 ROOT_URLCONF = 'yasuo.urls'
