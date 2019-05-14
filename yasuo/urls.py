@@ -19,6 +19,8 @@ from rest_framework.documentation import include_docs_urls
 from rest_framework.permissions import AllowAny
 import os
 from django.conf import settings
+from django.urls import re_path
+from django.views.static import serve
 
 doc_description = ''
 
@@ -30,3 +32,10 @@ urlpatterns = [
     path('api/', include('api.urls')),
     path('docs/', include_docs_urls(title='Documents', description=doc_description, permission_classes=(AllowAny, ))),
 ]
+
+if settings.DEBUG:
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$', serve, {
+            'document_root': settings.MEDIA_ROOT,
+        }),
+    ]
