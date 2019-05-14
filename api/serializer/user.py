@@ -6,7 +6,7 @@ from db.models import CustomUser
 class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('full_name', 'province', 'city')
+        fields = ('full_name', 'province', 'city', 'role', 'grade', 'work_place')
 
 
 class UserFollowSerializer(serializers.Serializer):

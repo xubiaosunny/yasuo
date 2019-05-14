@@ -10,4 +10,5 @@ urlpatterns = [
     path('user/info/', user.UserInfoView.as_view()),
     path('user/follow/', user.UserFollowView.as_view()),
     path('user/cities/', user.UserCityView.as_view()),
+    path('user/grades/', user.UserGradeView.as_view()),
 ]

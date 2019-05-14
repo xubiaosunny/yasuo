@@ -8,6 +8,9 @@ from django.forms.models import model_to_dict
 from django.utils.translation import gettext as _
 
 
+__all__ = ['CustomUser', 'Certification', 'SMSCode']
+
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, phone, password=None):
         """

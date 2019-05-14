@@ -4,6 +4,9 @@ from django.utils.translation import gettext as _
 from .auth import CustomUser
 
 
+__all__ = ['LocalStorage']
+
+
 def file_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/<file_type>/<filename>
     file_type = instance.type.split('/')[0] if instance.type else 'other'

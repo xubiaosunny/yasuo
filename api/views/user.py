@@ -26,6 +26,17 @@ class UserCityView(generics.GenericAPIView):
         return response_200(data)
 
 
+class UserGradeView(generics.GenericAPIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        """
+        获取年级选项
+        """
+        data = [{'label': g[1], 'value': g[0]} for g in CustomUser.GRADE_CHOICES]
+        return response_200(data)
+
+
 class UserInfoView(generics.GenericAPIView):
     """
     用户信息
