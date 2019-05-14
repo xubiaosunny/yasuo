@@ -34,7 +34,7 @@ class UserGradeView(generics.GenericAPIView):
         获取年级选项
         """
         data = [{'label': g[1], 'value': g[0]} for g in CustomUser.GRADE_CHOICES]
-        return response_200(data)
+        return response_200({'grades': data})
 
 
 class UserInfoView(generics.GenericAPIView):
@@ -109,4 +109,4 @@ class UserFollowView(generics.GenericAPIView):
         if not serializer.is_valid():
             return response_400(serializer.errors)
         request.user.follow.remove(serializer.data['user_id'])
-        return response_200({})
+        return response_200(request.data)
