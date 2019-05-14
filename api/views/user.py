@@ -23,7 +23,7 @@ class UserCityView(generics.GenericAPIView):
         else:
             data = CITY.get(province, [])
 
-        return response_200(data)
+        return response_200({'cities': data})
 
 
 class UserGradeView(generics.GenericAPIView):

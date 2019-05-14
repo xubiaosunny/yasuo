@@ -1,7 +1,6 @@
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from .auth import CustomUser
 
 
 __all__ = ['LocalStorage']
@@ -14,6 +13,8 @@ def file_path(instance, filename):
 
 
 class LocalStorage(models.Model):
+    from .auth import CustomUser
+
     user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
     type = models.CharField(_('File Type'), max_length=50)
     file = models.FileField(_('File'), upload_to='storage')

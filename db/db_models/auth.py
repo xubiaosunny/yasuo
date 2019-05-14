@@ -111,6 +111,8 @@ class CustomUser(AbstractBaseUser):
 
 
 class Certification(models.Model):
+    from .storage import LocalStorage
+
     STATUS_CHOICES = (
         ('Verifying', _('Verifying')),
         ('Pass', _('Pass')),
@@ -118,7 +120,7 @@ class Certification(models.Model):
     )
     user = models.OneToOneField(CustomUser, on_delete=models.SET_NULL, null=True)
     id_number = models.CharField(_('ID Number'), max_length=100)
-    certified_file = models.CharField(_('Certified File'), max_length=100)
+    certified_file = models.ForeignKey(LocalStorage, on_delete=models.PROTECT)
     status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=20)
     reject_cause = models.TextField(_('Reject Cause'))
     create_time = models.DateTimeField(_('Create Time'), auto_now_add=True, blank=True)
