@@ -83,3 +83,6 @@ msgstr "拒绝原因"
 
 msgid "Full Name"
 msgstr "姓名"
+
+msgid "file type is incorrect"
+msgstr "文件类型不正确"

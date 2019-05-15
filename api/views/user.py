@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 
 from api.serializer.user import UserInfoSerializer, UserFollowSerializer
 from utils.common.response import *
-from db.db_models.auth import CustomUser
+from db.db_models.auth import CustomUser, Certification
 from db.const import CITY
 
 
@@ -63,6 +63,7 @@ class UserInfoView(generics.GenericAPIView):
         if not serializer.is_valid():
             return response_400(serializer.errors)
         CustomUser.objects.filter(pk=request.user.id).update(**serializer.data)
+        Certification.objects.update_or_create(user=request.user, defaults=serializer.data)
         request.user.refresh_from_db()
         return response_200(request.user.to_dict())
 
