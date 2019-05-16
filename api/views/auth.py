@@ -76,6 +76,7 @@ class CertificationView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
+        """获取登陆用户（老师）认证信息"""
         try:
             certification = request.user.certification
         except Exception:
@@ -83,6 +84,7 @@ class CertificationView(generics.GenericAPIView):
         return response_200({'certification': certification.detail()})
 
     def post(self, request):
+        """创建登陆用户（老师）认证信息"""
         serializer = CertificationSerializer(data=request.data)
         if not serializer.is_valid():
             return response_400(serializer.errors)
@@ -91,6 +93,7 @@ class CertificationView(generics.GenericAPIView):
         return response_200({'certification': certification.detail()})
 
     def put(self, request):
+        """更新登陆用户（老师）认证信息"""
         serializer = CertificationSerializer(data=request.data)
         if not serializer.is_valid():
             return response_400(serializer.errors)
