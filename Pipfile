@@ -15,6 +15,7 @@ markdown = "*"
 pygments = "*"
 requests = "*"
 filetype = "*"
+celery = {extras = ["librabbitmq"],version = "*"}
 
 [requires]
 python_version = "3.7"

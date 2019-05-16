@@ -147,3 +147,9 @@ MEDIA_URL = config.SITE_DOMAIN + '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
+# Celery
+CELERY_BROKER_URL = config.CELERY['broker_url']
+CELERY_RESULT_BACKEND = config.CELERY['result_backend']
+CELERY_TIMEZONE = 'Asia/Shanghai'
+CELERY_ENABLE_UTC = True
+# CELERY_IMPORTS = ['utils.tasks.demo']
