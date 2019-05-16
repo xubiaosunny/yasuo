@@ -25,3 +25,9 @@ SMS_CLOOPEN = {
 ACCESS_KEY = ''
 
 SITE_DOMAIN = 'http://127.0.0.1:8000'
+
+CELERY = {
+    'broker_url': 'pyamqp://guest@localhost//',
+    'result_backend': 'rpc://'
+}
+
