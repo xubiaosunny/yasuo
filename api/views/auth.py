@@ -5,7 +5,7 @@ from django.forms.models import model_to_dict
 
 from api.serializer.auth import LoginSerializer, PhoneSerializer, CertificationSerializer
 from utils.common.response import *
-from db.models import CustomUser, SMSCode
+from db.models import CustomUser, SMSCode, Certification
 from utils.core.sms import CloopenSMS
 from utils.common.permissions import SignaturePermission
 
@@ -75,5 +75,25 @@ class CertificationView(generics.GenericAPIView):
     serializer_class = CertificationSerializer
     permission_classes = (IsAuthenticated,)
 
+    def get(self, request):
+        try:
+            certification = request.user.certification
+        except Exception:
+            certification = None
+        return response_200({'certification': certification.detail()})
+
     def post(self, request):
-        return response_200({})
+        serializer = CertificationSerializer(data=request.data)
+        if not serializer.is_valid():
+            return response_400(serializer.errors)
+        certification, flag = Certification.objects.update_or_create(
+            user=request.user, defaults={'status': Certification.STATUS_CHOICES[0][0], **serializer.validated_data})
+        return response_200({'certification': certification.detail()})
+
+    def put(self, request):
+        serializer = CertificationSerializer(data=request.data)
+        if not serializer.is_valid():
+            return response_400(serializer.errors)
+        certification, flag = Certification.objects.update_or_create(
+            user=request.user, defaults={'status': Certification.STATUS_CHOICES[0][0], **serializer.validated_data})
+        return response_200({'certification': certification.detail()})

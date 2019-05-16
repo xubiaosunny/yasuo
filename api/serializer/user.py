@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.utils.translation import gettext as _
-from db.models import CustomUser, LocalStorage
+from db.models import CustomUser, LocalStorage, Certification
 
 
 class UserInfoSerializer(serializers.ModelSerializer):
@@ -13,16 +13,33 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
     def validate_certified_file(self, value):
         if not value:
-            return value
-        if self.data.get('role', None) != CustomUser.ROLE_CHOICES[0][0]:
-            return value
+            return None
+        if self.initial_data.get('role', None) != CustomUser.ROLE_CHOICES[0][0]:
+            return None
         try:
             stroge = LocalStorage.objects.get(pk=value)
         except Exception:
             raise serializers.ValidationError(_('file not exist'))
         if not stroge.type.startswith('image'):
             raise serializers.ValidationError(_('file type is incorrect'))
-        return value
+        return stroge
+
+    def update(self, instance, validated_data):
+        instance.full_name = validated_data.get('full_name', instance.full_name)
+        instance.province = validated_data.get('province', instance.province)
+        instance.city = validated_data.get('city', instance.city)
+        instance.role = validated_data.get('role', instance.role)
+        instance.grade = validated_data.get('grade', instance.grade)
+        instance.work_place = validated_data.get('work_place', instance.work_place)
+        instance.save()
+        if self.validated_data.get('role', None) == CustomUser.ROLE_CHOICES[0][0]:
+            certification_data = {
+                'id_number': validated_data.get('id_number', ''),
+                'certified_file': validated_data.get('certified_file', None),
+                'status': Certification.STATUS_CHOICES[0][0]
+            }
+            Certification.objects.update_or_create(user=instance, defaults=certification_data)
+        return instance
 
 
 class UserFollowSerializer(serializers.Serializer):

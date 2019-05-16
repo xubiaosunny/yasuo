@@ -59,13 +59,11 @@ class UserInfoView(generics.GenericAPIView):
 
     def patch(self, request):
         """更新用户信息"""
-        serializer = UserInfoSerializer(data=request.data)
+        serializer = UserInfoSerializer(instance=request.user, data=request.data)
         if not serializer.is_valid():
             return response_400(serializer.errors)
-        CustomUser.objects.filter(pk=request.user.id).update(**serializer.data)
-        Certification.objects.update_or_create(user=request.user, defaults=serializer.data)
-        request.user.refresh_from_db()
-        return response_200(request.user.to_dict())
+        user = serializer.save()
+        return response_200(user.to_dict())
 
 
 class UserFollowView(generics.GenericAPIView):
