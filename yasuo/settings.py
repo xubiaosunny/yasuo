@@ -152,4 +152,4 @@ CELERY_BROKER_URL = config.CELERY['broker_url']
 CELERY_RESULT_BACKEND = config.CELERY['result_backend']
 CELERY_TIMEZONE = 'Asia/Shanghai'
 CELERY_ENABLE_UTC = True
-# CELERY_IMPORTS = ['utils.tasks.demo']
+CELERY_IMPORTS = ['utils.tasks']
