@@ -24,7 +24,7 @@ def add_watermark(storage_id):
     if storage.type.startswith('image'):
         return add_watermark_for_image(storage)
     elif storage.type.startswith('video'):
-        return add_watermark_for_image(storage)
+        return add_watermark_for_video(storage)
     return False
 
 
@@ -58,6 +58,18 @@ def add_watermark_for_image(storage):
 
 
 def add_watermark_for_video(storage):
-    pass
+    for _ in range(3):
+        name = '%s.mp4' % random_name()
+        out_file = os.path.join(LocalStorage.WATERMARK_PATH, name)
+        if not os.path.exists(out_file):
+            output = os.popen(
+                'ffmpeg -y -i %s -i %s -filter_complex overlay=0:H-h -c:v libx264 -strict -2 %s' %
+                (storage.file.path, WATERMARK_IMG, out_file))
+            logging.info(output.read())
+            if os.path.exists(out_file):
+                storage.watermarked_filename = name
+                storage.save()
+                return True
+    return False
 
 

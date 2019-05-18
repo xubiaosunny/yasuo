@@ -3,6 +3,7 @@ from django.utils.translation import gettext as _
 from rest_framework.fields import empty
 
 from db.models import LocalStorage
+from utils.tasks import add_watermark
 
 
 class LocalStorageSerializer(serializers.ModelSerializer):
@@ -16,5 +17,7 @@ class LocalStorageSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         file_type = validated_data['file'].content_type
-        return LocalStorage.objects.create(user=self._user, type=file_type, file=validated_data['file'])
+        storage = LocalStorage.objects.create(user=self._user, type=file_type, file=validated_data['file'])
+        add_watermark.delay(storage.id)
+        return storage
 
