@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from django.conf import settings
+import os
 
 
 __all__ = ['LocalStorage']
@@ -14,10 +16,12 @@ def file_path(instance, filename):
 
 class LocalStorage(models.Model):
     from .auth import CustomUser
+    WATERMARK_PATH = os.path.join(settings.MEDIA_ROOT, '_storage')
 
     user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
     type = models.CharField(_('File Type'), max_length=50)
     file = models.FileField(_('File'), upload_to='storage')
+    watermarked_filename = models.CharField(_('watermarked filename'), max_length=50, null=True, blank=True)
     create_time = models.DateTimeField(_('Create Time'), auto_now_add=True, blank=True)
 
     def details(self):

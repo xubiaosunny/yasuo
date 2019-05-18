@@ -16,6 +16,7 @@ pygments = "*"
 requests = "*"
 filetype = "*"
 celery = {extras = ["librabbitmq"],version = "*"}
+pillow = "*"
 
 [requires]
 python_version = "3.7"
