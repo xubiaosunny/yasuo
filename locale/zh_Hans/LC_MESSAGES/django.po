@@ -86,3 +86,9 @@ msgstr "姓名"
 
 msgid "file type is incorrect"
 msgstr "文件类型不正确"
+
+msgid "Summary"
+msgstr "简介"
+
+msgid "Location"
+msgstr "定位"

@@ -127,7 +127,9 @@ class Certification(models.Model):
     update_time = models.DateTimeField(_('Update Time'), auto_now=True, blank=True)
 
     def detail(self):
-        return model_to_dict(self)
+        data = model_to_dict(self, fields=['user', 'id_number', 'reject_cause'])
+        data['certified_file'] = self.certified_file.get_url()
+        return data
 
 
 class SMSCode(models.Model):

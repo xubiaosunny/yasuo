@@ -16,7 +16,8 @@ def file_path(instance, filename):
 
 class LocalStorage(models.Model):
     from .auth import CustomUser
-    WATERMARK_PATH = os.path.join(settings.MEDIA_ROOT, '_storage')
+    WATERMARK_DIR = '_storage'
+    WATERMARK_PATH = os.path.join(settings.MEDIA_ROOT, WATERMARK_DIR)
 
     user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
     type = models.CharField(_('File Type'), max_length=50)
@@ -30,6 +31,12 @@ class LocalStorage(models.Model):
         data['user_id'] = self.user_id
         data['type'] = self.type
         data['name'] = self.file.name
-        data['url'] = self.file.url
+        data['url'] = self.get_url()
         data['create_time'] = self.create_time
         return data
+
+    def get_url(self):
+        if self.watermarked_filename:
+            return settings.MEDIA_URL + os.path.join(self.WATERMARK_DIR, self.watermarked_filename)
+        else:
+            return self.file.url
