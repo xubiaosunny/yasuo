@@ -17,6 +17,7 @@ requests = "*"
 filetype = "*"
 celery = {extras = ["librabbitmq"],version = "*"}
 pillow = "*"
+jpush = "*"
 
 [requires]
 python_version = "3.7"

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "0bf69f6e1090834ef2f87f6694d362f84b0a27e5808d2842d10855d5ca16331a"
+            "sha256": "2dfdf7f24d3bda2e2bdd1b42c01edd0bfb4fd67b35f882aa582dd4eb01ba8262"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -126,6 +126,13 @@
                 "sha256:14dd6caf1527abb21f08f86c784eac40853ba93edb79552aa1e4b8aef1b61c7b"
             ],
             "version": "==2.10.1"
+        },
+        "jpush": {
+            "hashes": [
+                "sha256:520ee3cd0913a1bca0be5c87118e427ea295b2c15806f4eb21ca48943f2efcfb"
+            ],
+            "index": "pypi",
+            "version": "==3.3.7"
         },
         "kombu": {
             "hashes": [

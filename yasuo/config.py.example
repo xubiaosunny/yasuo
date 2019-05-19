@@ -31,3 +31,8 @@ CELERY = {
     'result_backend': 'rpc://'
 }
 
+J_PUSH = {
+    'appKey': '',
+    'masterSecret': ''
+}
+
