@@ -1,17 +1,30 @@
 version: '3'
 services:
-  web:
-    build: .
-    ports:
-     - "8000:8000"
-    volumes:
-     - .:/code
   db:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
+      MYSQL_DATABASE: yasuo
       MYSQL_ROOT_PASSWORD: yasuo
-  rabbitmq:
+  rabbit:
     image: rabbitmq:3
     restart: always
+  web:
+    build: .
+    command: python3 manage.py runserver
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+      - rabbit
+  celery:
+    image: yasuo_web
+    command: celery -A yasuo worker -l info
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+      - rabbit
