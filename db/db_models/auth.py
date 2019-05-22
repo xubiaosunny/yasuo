@@ -46,10 +46,10 @@ class CustomUser(AbstractBaseUser):
         ('S', _('Student')),
     )
     GRADE_CHOICES = (
-        ('10', _('grade ten')),
-        ('11', _('grade eleven')),
-        ('12', _('grade twelve')),
-        ('13', _('return students')),
+        (10, _('grade ten')),
+        (11, _('grade eleven')),
+        (12, _('grade twelve')),
+        (13, _('return students')),
     )
 
     phone = models.CharField(_('Phone Number'), max_length=100, unique=True)

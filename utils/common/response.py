@@ -25,7 +25,7 @@ def response_400(data, msg='Invalid Params'):
         _data = {k: str(v[0]) if isinstance(v, list) else v for k, v in data.items()}
     else:
         _data = data
-    return Response({"msg": msg, "detail": _data}, status=HTTP_400_BAD_REQUEST)
+    return Response({"msg": msg, "detailInfo": _data}, status=HTTP_400_BAD_REQUEST)
 
 
 def response_404(msg='Not Found'):
