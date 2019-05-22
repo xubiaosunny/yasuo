@@ -92,3 +92,6 @@ msgstr "简介"
 
 msgid "Location"
 msgstr "定位"
+
+msgid "Question"
+msgstr "问题"

@@ -4,16 +4,34 @@ from django.utils.translation import gettext as _
 from django.conf import settings
 
 
-__all__ = ['Works']
+__all__ = ['Works', 'WorksComment']
 
 
 class Works(models.Model):
     from .auth import CustomUser
     from .storage import LocalStorage
 
-    user = models.OneToOneField(CustomUser, on_delete=models.PROTECT)
-    storage = models.ForeignKey(LocalStorage, on_delete=models.PROTECT, null=True)
-    summary = models.TextField(_('Summary'))
-    location = models.CharField(_('Location'), max_length=50)
+    user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
+    storage = models.ForeignKey(LocalStorage, on_delete=models.PROTECT)
+    summary = models.TextField(_('Summary'), default='', blank=True)
+    location = models.CharField(_('Location'), max_length=50, null=True, blank=True)
     create_time = models.DateTimeField(_('Create Time'), auto_now_add=True)
     is_delete = models.BooleanField(default=False)
+
+
+class WorksComment(models.Model):
+    from .auth import CustomUser
+    from .storage import LocalStorage
+
+    user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
+    voice = models.ForeignKey(LocalStorage, on_delete=models.PROTECT)
+    is_pay = models.BooleanField(default=False)
+    create_time = models.DateTimeField(_('Create Time'), auto_now_add=True)
+    update_time = models.DateTimeField(_('Update Time'), auto_now=True)
+
+
+class WorksAsk(models.Model):
+    from .auth import CustomUser
+    to = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
+    question = models.TextField(_('Question'))
+    create_time = models.DateTimeField(_('Create Time'), auto_now_add=True)
