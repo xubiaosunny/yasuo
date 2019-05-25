@@ -1,8 +1,9 @@
 from django import forms
+from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
-from db.models import CustomUser
+from db.models import CustomUser, SMSCode
 
 
 class UserCreationForm(forms.ModelForm):
@@ -76,3 +77,11 @@ class UserAdmin(BaseUserAdmin):
     search_fields = ('phone',)
     ordering = ('date_joined',)
     filter_horizontal = ()
+
+    def has_delete_permission(self, request, obj=None):
+        """ 取消后台删除用户功能 """
+        return False
+
+
+class SMSCodeAdmin(admin.ModelAdmin):
+    list_display = ('phone', 'code', 'send_time')

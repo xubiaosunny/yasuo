@@ -79,6 +79,8 @@ class CustomUser(AbstractBaseUser):
         indexes = [
             models.Index(fields=['is_admin', 'role']),
         ]
+        verbose_name = _('User')
+        verbose_name_plural = _('User')
 
     def __str__(self):
         return '%s %s' % (self.full_name, self.phone)
@@ -141,6 +143,9 @@ class SMSCode(models.Model):
         indexes = [
             models.Index(fields=["phone", "send_time"]),
         ]
+
+        verbose_name = _('SMS Code')
+        verbose_name_plural = _('SMS Code')
 
     def is_expired(self):
         # a code will be invalid after 5 minutes

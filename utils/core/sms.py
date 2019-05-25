@@ -6,6 +6,10 @@ import base64
 from yasuo.config import SMS_CLOOPEN
 
 
+class CloopenStatusCodeException(Exception):
+    pass
+
+
 class CloopenSMS():
     def __init__(self):
         self.account_sid = SMS_CLOOPEN['accountSid']
@@ -51,6 +55,6 @@ class CloopenSMS():
     def send_code(self, phone, code):
         res = self._send_sms(199869, [phone], [code, '5'])
         if res['statusCode'] != '000000':
-            raise Exception('%s : %s' % (res['statusCode'], res['statusMsg']))
+            raise CloopenStatusCodeException('%s:%s' % (res['statusCode'], res['statusMsg']))
 
 

@@ -95,3 +95,6 @@ msgstr "定位"
 
 msgid "Question"
 msgstr "问题"
+
+msgid "unsupported file type"
+msgstr "不支持的文件类型"

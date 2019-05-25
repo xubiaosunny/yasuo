@@ -6,7 +6,7 @@ from django.forms.models import model_to_dict
 from api.serializer.auth import LoginSerializer, PhoneSerializer, CertificationSerializer
 from utils.common.response import *
 from db.models import CustomUser, SMSCode, Certification
-from utils.core.sms import CloopenSMS
+from utils.core.sms import CloopenSMS, CloopenStatusCodeException
 from utils.common.permissions import SignaturePermission
 
 
@@ -15,7 +15,7 @@ class SendCodeView(generics.GenericAPIView):
     发送验证码
     """
     serializer_class = PhoneSerializer
-    permission_classes = (SignaturePermission,)
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         serializer = PhoneSerializer(data=request.data)
@@ -29,7 +29,12 @@ class SendCodeView(generics.GenericAPIView):
 
         code = self._get_random_code()
         sms = CloopenSMS()
-        sms.send_code(phone, code)
+        try:
+            sms.send_code(phone, code)
+        except CloopenStatusCodeException as e:
+            return response_400({'phone': str(e).split(':', maxsplit=1)[1]})
+        except Exception as e:
+            raise e
         code_recond = SMSCode.objects.create(phone=phone, code=code)
         return response_200({'phone': code_recond.phone, 'send_time': code_recond.send_time})
 

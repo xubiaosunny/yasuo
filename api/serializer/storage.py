@@ -4,6 +4,7 @@ from rest_framework.fields import empty
 
 from db.models import LocalStorage
 from utils.tasks import add_watermark
+import filetype
 
 
 class LocalStorageSerializer(serializers.ModelSerializer):
@@ -15,9 +16,16 @@ class LocalStorageSerializer(serializers.ModelSerializer):
         self._user = self.partial = kwargs.pop('user', None)
         super().__init__(instance=instance, data=data, **kwargs)
 
+    def validate_file(self, value):
+        kind = filetype.guess(value)
+        if kind is None:
+            raise serializers.ValidationError(_('unsupported file type'))
+        if value.content_type != kind.mime:
+            value.content_type = kind.mime
+        return value
+
     def create(self, validated_data):
         file_type = validated_data['file'].content_type
         storage = LocalStorage.objects.create(user=self._user, type=file_type, file=validated_data['file'])
         add_watermark.delay(storage.id)
         return storage
-
