@@ -15,7 +15,7 @@ class SendCodeView(generics.GenericAPIView):
     发送验证码
     """
     serializer_class = PhoneSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (SignaturePermission,)
 
     def post(self, request):
         serializer = PhoneSerializer(data=request.data)
