@@ -98,3 +98,36 @@ msgstr "问题"
 
 msgid "unsupported file type"
 msgstr "不支持的文件类型"
+
+msgid "File Type"
+msgstr "文件类型"
+
+msgid "Create Time"
+msgstr "创建时间"
+
+msgid "Local Storage"
+msgstr "本地存储"
+
+msgid "watermarked filename"
+msgstr "加水印后的文件名"
+
+msgid "Update Time"
+msgstr "更新时间"
+
+msgid "Works"
+msgstr "作品"
+
+msgid "Works Comment"
+msgstr "作品评论"
+
+msgid "Works Question"
+msgstr "作品提问"
+
+msgid "Works Question Reply"
+msgstr "作品提问回复"
+
+msgid "Type"
+msgstr "类型"
+
+msgid "The file type is incorrect, Please upload an image or video"
+msgstr "文件类型不正确，请上传图片或视频"

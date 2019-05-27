@@ -25,6 +25,10 @@ class LocalStorage(models.Model):
     watermarked_filename = models.CharField(_('watermarked filename'), max_length=50, null=True, blank=True)
     create_time = models.DateTimeField(_('Create Time'), auto_now_add=True, blank=True)
 
+    class Meta:
+        verbose_name = _('Local Storage')
+        verbose_name_plural = _('Local Storage')
+
     def details(self):
         data = dict()
         data['id'] = self.id

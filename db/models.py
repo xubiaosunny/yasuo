@@ -1,2 +1,3 @@
 from .db_models.auth import *
 from .db_models.storage import *
+from .db_models.works import *
