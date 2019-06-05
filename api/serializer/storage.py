@@ -27,5 +27,13 @@ class LocalStorageSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         file_type = validated_data['file'].content_type
         storage = LocalStorage.objects.create(user=self._user, type=file_type, file=validated_data['file'])
-        add_watermark.delay(storage.id)
+
+        if file_type.startswith('image') or file_type.startswith('video'):
+            add_watermark.delay(storage.id)
+
+        if file_type.startswith('audio'):
+            from pydub import AudioSegment
+            audio = AudioSegment.from_file(storage.file.path)
+            storage.duration_seconds = audio.duration_seconds
+            storage.save()
         return storage

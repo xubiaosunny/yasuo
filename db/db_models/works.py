@@ -16,7 +16,7 @@ class Works(models.Model):
     storage = models.ForeignKey(LocalStorage, on_delete=models.PROTECT)
     summary = models.TextField(_('Summary'), default='', blank=True)
     favorite = models.ManyToManyField(CustomUser, related_name='favorite_works')
-    location = models.CharField(_('Location'), max_length=50, null=True, blank=True)
+    location = models.CharField(_('Location'), max_length=50, null=True, blank=True, db_index=True)
     create_time = models.DateTimeField(_('Create Time'), auto_now_add=True)
     is_delete = models.BooleanField(default=False)
 
@@ -24,7 +24,7 @@ class Works(models.Model):
         verbose_name = _('Works')
         verbose_name_plural = _('Works')
 
-    def details(self):
+    def details(self, user=None):
         data = dict()
         data['id'] = self.id
         data['user_id'] = self.user_id
@@ -34,13 +34,22 @@ class Works(models.Model):
         data['favorite_number'] = self.favorite.count()
         data['location'] = self.location
         data['create_time'] = self.create_time
+
+        if user:
+            data['is_favorite'] = self.favorite.filter(pk=user.id).exists()
+
         return data
+
+    def mark_deleted(self):
+        self.is_delete = True
+        self.save()
 
 
 class WorksComment(models.Model):
     from .auth import CustomUser
     from .storage import LocalStorage
 
+    works = models.ForeignKey(Works, on_delete=models.PROTECT)
     user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
     voice = models.ForeignKey(LocalStorage, on_delete=models.PROTECT)
     is_pay = models.BooleanField(default=False)
@@ -51,10 +60,20 @@ class WorksComment(models.Model):
         verbose_name = _('Works Comment')
         verbose_name_plural = _('Works Comment')
 
+    def details(self):
+        data = dict()
+        data['id'] = self.id
+        data['works'] = self.works.details()
+        data['comment'] = self.voice.details()
+        data['is_pay'] = self.is_pay
+        data['create_time'] = self.create_time
+        data['update_time'] = self.update_time
+
 
 class WorksQuestion(models.Model):
     from .auth import CustomUser
 
+    works = models.ForeignKey(Works, on_delete=models.PROTECT)
     to = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
     question = models.TextField(_('Question'))
     is_pay = models.BooleanField(default=False)

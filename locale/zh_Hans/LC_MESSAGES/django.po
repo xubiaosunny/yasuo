@@ -131,3 +131,12 @@ msgstr "类型"
 
 msgid "The file type is incorrect, Please upload an image or video"
 msgstr "文件类型不正确，请上传图片或视频"
+
+msgid "The file type is incorrect, Please upload an audio"
+msgstr "文件类型不正确，请上传语音"
+
+msgid "Duration"
+msgstr "时长"
+
+msgid "You have commented on the work"
+msgstr "你已经评论过该作品"

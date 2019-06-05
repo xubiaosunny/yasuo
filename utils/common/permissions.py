@@ -2,6 +2,7 @@ from rest_framework.permissions import BasePermission
 import hashlib
 import datetime
 
+from db.models import CustomUser
 from yasuo.config import ACCESS_KEY
 
 
@@ -21,3 +22,13 @@ class SignaturePermission(BasePermission):
         m.update(request.path.encode('utf-8'))
         m.update(date_str.encode('utf-8'))
         return signature == m.hexdigest()
+
+
+class IsTeacher(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.role == CustomUser.ROLE_CHOICES[0][0]
+
+
+class IsStudent(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.role == CustomUser.ROLE_CHOICES[1][0]

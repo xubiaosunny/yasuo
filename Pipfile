@@ -18,6 +18,7 @@ filetype = "*"
 celery = {extras = ["librabbitmq"],version = "*"}
 pillow = "*"
 jpush = "*"
+pydub = "*"
 
 [requires]
 python_version = "3.7"

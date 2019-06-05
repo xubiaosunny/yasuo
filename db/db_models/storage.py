@@ -22,6 +22,7 @@ class LocalStorage(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
     type = models.CharField(_('File Type'), max_length=50)
     file = models.FileField(_('File'), upload_to='storage')
+    duration_seconds = models.FloatField(_('Duration'), null=True, blank=True)
     watermarked_filename = models.CharField(_('watermarked filename'), max_length=50, null=True, blank=True)
     create_time = models.DateTimeField(_('Create Time'), auto_now_add=True, blank=True)
 
@@ -36,6 +37,7 @@ class LocalStorage(models.Model):
         data['type'] = self.type
         data['name'] = self.file.name
         data['url'] = self.get_url()
+        data['duration_seconds'] = self.duration_seconds
         data['create_time'] = self.create_time
         return data
 

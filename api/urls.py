@@ -15,4 +15,6 @@ urlpatterns = [
     path('storage/local_storage/', storage.LocalStorageView.as_view()),
 
     path('works/', works.WorksView.as_view()),
+    path('works/<int:_id>/favorite/', works.WorksFavoriteView.as_view()),
+    path('works/<int:_id>/comment/', works.WorksCommentView.as_view()),
 ]
