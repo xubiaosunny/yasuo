@@ -68,6 +68,7 @@ class WorksComment(models.Model):
         data['is_pay'] = self.is_pay
         data['create_time'] = self.create_time
         data['update_time'] = self.update_time
+        return data
 
 
 class WorksQuestion(models.Model):

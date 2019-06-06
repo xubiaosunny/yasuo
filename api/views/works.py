@@ -67,6 +67,11 @@ class WorksCommentView(generics.GenericAPIView):
     serializer_class = WorksCommentSerializer
     permission_classes = (IsAuthenticated, IsTeacher)
 
+    def get(self, request, _id):
+        """获取_id对应作品的所有评论"""
+        comments = WorksComment.objects.filter(works_id=_id)
+        return response_200({'comments': [comment.details() for comment in comments]})
+
     def post(self, request, _id):
         """评论"""
         works = get_object_or_404(Works, pk=_id)
@@ -77,8 +82,8 @@ class WorksCommentView(generics.GenericAPIView):
             WorksComment.objects.get(user=request.user, works=works)
         except ObjectDoesNotExist:
             comment = WorksComment.objects.create(user=request.user, works=works, **serializer.validated_data)
+            return response_200(comment.details())
         except Exception as e:
             raise e
         else:
             return response_400({'voice': _('You have commented on the work')})
-        return response_200(comment.details())
