@@ -32,6 +32,7 @@ class Works(models.Model):
         data['storage'] = self.storage.details()
         data['summary'] = self.summary
         data['favorite_number'] = self.favorite.count()
+        data['comment_number'] = self.workscomment_set.count()
         data['location'] = self.location
         data['create_time'] = self.create_time
 
@@ -63,7 +64,7 @@ class WorksComment(models.Model):
     def details(self):
         data = dict()
         data['id'] = self.id
-        data['works'] = self.works.details()
+        # data['works'] = self.works.details()
         data['comment'] = self.voice.details()
         data['is_pay'] = self.is_pay
         data['create_time'] = self.create_time
@@ -84,6 +85,15 @@ class WorksQuestion(models.Model):
         verbose_name = _('Works Question')
         verbose_name_plural = _('Works Question')
 
+    def details(self):
+        data = dict()
+        data['id'] = self.id
+        # data['works'] = self.works.details()
+        data['to'] = self.to.to_dict()
+        data['question'] = self.question
+        data['is_pay'] = self.is_pay
+        data['create_time'] = self.create_time
+        return data
 
 class WorksQuestionReply(models.Model):
     from .storage import LocalStorage

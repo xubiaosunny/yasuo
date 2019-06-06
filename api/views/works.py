@@ -6,9 +6,9 @@ from rest_framework import serializers
 from django.core.exceptions import ObjectDoesNotExist
 
 from utils.common.response import *
-from utils.common.permissions import IsTeacher
-from api.serializer.works import WorksSerializer, WorksCommentSerializer
-from db.models import Works, WorksComment
+from utils.common.permissions import IsTeacher, IsStudent, my_permission_classes
+from api.serializer.works import WorksSerializer, WorksCommentSerializer, WorksQuestionSerializer
+from db.models import Works, WorksComment, WorksQuestion
 
 
 class WorksView(generics.GenericAPIView):
@@ -65,13 +65,14 @@ class WorksFavoriteView(generics.GenericAPIView):
 
 class WorksCommentView(generics.GenericAPIView):
     serializer_class = WorksCommentSerializer
-    permission_classes = (IsAuthenticated, IsTeacher)
+    permission_classes = (IsAuthenticated, )
 
     def get(self, request, _id):
         """获取_id对应作品的所有评论"""
         comments = WorksComment.objects.filter(works_id=_id)
         return response_200({'comments': [comment.details() for comment in comments]})
 
+    @my_permission_classes((IsTeacher, ))
     def post(self, request, _id):
         """评论"""
         works = get_object_or_404(Works, pk=_id)
@@ -87,3 +88,23 @@ class WorksCommentView(generics.GenericAPIView):
             raise e
         else:
             return response_400({'voice': _('You have commented on the work')})
+
+
+class WorksQuestionView(generics.GenericAPIView):
+    serializer_class = WorksQuestionSerializer
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request, _id):
+        """获取_id对应作品的所有提问"""
+        questions = WorksQuestion.objects.filter(works_id=_id)
+        return response_200({'questions': [question.details() for question in questions]})
+
+    @my_permission_classes((IsStudent,))
+    def post(self, request, _id):
+        """就_id对应的作品进行提问"""
+        works = get_object_or_404(Works, pk=_id)
+        serializer = WorksQuestionSerializer(data=request.data)
+        if not serializer.is_valid():
+            return response_400(serializer.errors)
+        question = WorksQuestion.objects.create(works=works, **serializer.validated_data)
+        return response_200(question.details())

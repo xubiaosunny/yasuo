@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.utils.translation import gettext as _
-from db.models import Works, WorksComment
+from db.models import Works, WorksComment, WorksQuestion
 
 
 class WorksSerializer(serializers.ModelSerializer):
@@ -23,3 +23,9 @@ class WorksCommentSerializer(serializers.ModelSerializer):
         if not value.type.startswith('audio'):
             raise serializers.ValidationError(_('The file type is incorrect, Please upload an audio'))
         return value
+
+
+class WorksQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorksQuestion
+        fields = ('to', 'question')
