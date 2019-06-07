@@ -84,4 +84,4 @@ class UserAdmin(BaseUserAdmin):
 
 
 class SMSCodeAdmin(admin.ModelAdmin):
-    list_display = ('phone', 'code', 'send_time')
+    list_display = ('id', 'phone', 'code', 'send_time')

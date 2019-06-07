@@ -95,6 +95,7 @@ class WorksQuestion(models.Model):
         data['create_time'] = self.create_time
         return data
 
+
 class WorksQuestionReply(models.Model):
     from .storage import LocalStorage
 

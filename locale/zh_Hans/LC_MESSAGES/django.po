@@ -140,3 +140,12 @@ msgstr "时长"
 
 msgid "You have commented on the work"
 msgstr "你已经评论过该作品"
+
+msgid "Data"
+msgstr "数据"
+
+msgid "YiQiPing"
+msgstr "艺起评"
+
+msgid "YiQiPing Management System"
+msgstr "艺起评后台管理系统"
