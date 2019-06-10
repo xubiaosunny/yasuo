@@ -11,8 +11,15 @@ class Works(models.Model):
     from .auth import CustomUser
     from .storage import LocalStorage
 
+    TYPE_CHOICES = (
+        ('Drawing', _('Drawing')),
+        ('Color', _('Color')),
+        ('Sketch', _('Sketch')),
+        ('Constitute', _('Constitute'))
+    )
+
     user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
-    type = models.CharField(_('Type'), max_length=50, null=True, blank=True)
+    type = models.CharField(_('Type'), choices=TYPE_CHOICES, max_length=50, null=True, blank=True)
     storage = models.ForeignKey(LocalStorage, on_delete=models.PROTECT)
     summary = models.TextField(_('Summary'), default='', blank=True)
     favorite = models.ManyToManyField(CustomUser, related_name='favorite_works')
@@ -89,6 +96,7 @@ class WorksQuestion(models.Model):
         data = dict()
         data['id'] = self.id
         # data['works'] = self.works.details()
+        data['works_id'] = self.works_id
         data['to'] = self.to.to_dict()
         data['question'] = self.question
         data['is_pay'] = self.is_pay

@@ -15,9 +15,11 @@ urlpatterns = [
     path('storage/local_storage/', storage.LocalStorageView.as_view()),
 
     path('works/', works.WorksView.as_view()),
+    path('works/category/', works.WorksCategoryView.as_view()),
     path('works/<int:_id>/favorite/', works.WorksFavoriteView.as_view()),
     path('works/<int:_id>/comment/', works.WorksCommentView.as_view()),
     path('works/<int:_id>/question/', works.WorksQuestionView.as_view()),
+    path('works/question/', works.WorksDirectQuestionView.as_view()),
 
     path('home/', home.IndexView.as_view()),
 ]

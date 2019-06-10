@@ -149,3 +149,15 @@ msgstr "艺起评"
 
 msgid "YiQiPing Management System"
 msgstr "艺起评后台管理系统"
+
+msgid "Drawing"
+msgstr "素描"
+
+msgid "Color"
+msgstr "色彩"
+
+msgid "Sketch"
+msgstr "速写"
+
+msgid "Constitute"
+msgstr "构成"

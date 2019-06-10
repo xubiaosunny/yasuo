@@ -11,6 +11,14 @@ from api.serializer.works import WorksSerializer, WorksCommentSerializer, WorksQ
 from db.models import Works, WorksComment, WorksQuestion
 
 
+class WorksCategoryView(generics.GenericAPIView):
+    permission_classes = (AllowAny, )
+
+    def get(self, request):
+        """获取作品可选分类"""
+        return response_200({'category': [{'label': c[1], 'value': c[0]} for c in Works.TYPE_CHOICES]})
+
+
 class WorksView(generics.GenericAPIView):
     """
     作品
@@ -107,4 +115,32 @@ class WorksQuestionView(generics.GenericAPIView):
         if not serializer.is_valid():
             return response_400(serializer.errors)
         question = WorksQuestion.objects.create(works=works, **serializer.validated_data)
+        return response_200(question.details())
+
+
+class WorksDirectQuestionView(generics.GenericAPIView):
+    serializer_class = serializers.Serializer
+    permission_classes = (IsAuthenticated, )
+
+    @my_permission_classes((IsStudent,))
+    def post(self, request):
+        """
+        发布作品并进行提问,
+        参数为创建作品和创建提问的一致：
+            `type`
+            `storage`
+            `summary`
+            `location`
+            `to`
+            `question`
+        """
+        serializer_1 = WorksSerializer(data=request.data)
+        serializer_2 = WorksQuestionSerializer(data=request.data)
+        flag_1 = serializer_1.is_valid()
+        flag_2 = serializer_2.is_valid()
+        if not flag_1 or not flag_2:
+            return response_400({**serializer_1.errors, **serializer_2.errors})
+
+        works = Works.objects.create(user=request.user, **serializer_1.validated_data)
+        question = WorksQuestion.objects.create(works=works, **serializer_2.validated_data)
         return response_200(question.details())
