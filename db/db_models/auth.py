@@ -69,7 +69,7 @@ class CustomUser(AbstractBaseUser):
     grade = models.IntegerField(choices=GRADE_CHOICES, null=True, blank=True)
 
     # teacher info
-    work_place = models.CharField(_('Work Place'), max_length=255, default='', blank=True)
+    work_place = models.CharField(_('Work Place'), max_length=255, default='', blank=True, db_index=True)
 
     objects = CustomUserManager()
     USERNAME_FIELD = 'phone'

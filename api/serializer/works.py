@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from django.utils.translation import gettext as _
-from db.models import Works, WorksComment, WorksQuestion
+from django.core.exceptions import ObjectDoesNotExist
+from db.models import Works, WorksComment, WorksQuestion, CustomUser
+
 
 
 class WorksSerializer(serializers.ModelSerializer):
@@ -29,3 +31,24 @@ class WorksQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorksQuestion
         fields = ('to', 'question')
+
+
+class WorksAndQuestionSerializer(serializers.ModelSerializer):
+    to = serializers.IntegerField(required=False)
+    question = serializers.CharField(required=False)
+
+    class Meta:
+        model = Works
+        fields = ('type', 'storage', 'summary', 'location', 'to', 'question')
+
+    def validate_to(self, value):
+        try:
+            user = CustomUser.objects.get(pk=value)
+        except ObjectDoesNotExist:
+            raise serializers.ValidationError(_('User does not exist'))
+        except Exception as e:
+            raise e
+
+        if user.role != CustomUser.ROLE_CHOICES[0][0]:
+            raise serializers.ValidationError(_('Only ask the teacher questions'))
+        return value

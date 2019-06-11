@@ -37,6 +37,43 @@ class UserGradeView(generics.GenericAPIView):
         return response_200({'grades': data})
 
 
+class UserWorkspaceOfTeacherView(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        """
+        获取老师们的工作地址
+        """
+        users = CustomUser.objects.filter(role=CustomUser.ROLE_CHOICES[0][0]).values('work_place').distinct()
+        return response_200({'work_places': [u['work_place'] for u in users]})
+
+
+class UserAllWorkspaceOfTeacherView(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        """
+        获取老师们的工作地址
+        """
+        users = CustomUser.objects.filter(role=CustomUser.ROLE_CHOICES[0][0]).values('work_place').distinct()
+        return response_200({'work_places': [u['work_place'] for u in users]})
+
+
+class UserTeacherOfWorkspaceView(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        """
+        GET参数`work_space`，获取该学校（单位）老师们
+        """
+        work_space = request.GET.get('work_space', None)
+        if work_space:
+            users = CustomUser.objects.filter(work_place=work_space)
+            return response_200({'teachers': [u.to_dict() for u in users]})
+        else:
+            return response_404()
+
+
 class UserInfoView(generics.GenericAPIView):
     """
     用户信息

@@ -7,7 +7,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from utils.common.response import *
 from utils.common.permissions import IsTeacher, IsStudent, my_permission_classes
-from api.serializer.works import WorksSerializer, WorksCommentSerializer, WorksQuestionSerializer
+from api.serializer.works import WorksSerializer, WorksCommentSerializer, WorksQuestionSerializer, \
+    WorksAndQuestionSerializer
 from db.models import Works, WorksComment, WorksQuestion
 
 
@@ -119,28 +120,22 @@ class WorksQuestionView(generics.GenericAPIView):
 
 
 class WorksDirectQuestionView(generics.GenericAPIView):
-    serializer_class = serializers.Serializer
+    serializer_class = WorksAndQuestionSerializer
     permission_classes = (IsAuthenticated, )
 
     @my_permission_classes((IsStudent,))
     def post(self, request):
         """
-        发布作品并进行提问,
-        参数为创建作品和创建提问的一致：
-            `type`
-            `storage`
-            `summary`
-            `location`
-            `to`
-            `question`
+        发布作品并进行提问
         """
-        serializer_1 = WorksSerializer(data=request.data)
-        serializer_2 = WorksQuestionSerializer(data=request.data)
-        flag_1 = serializer_1.is_valid()
-        flag_2 = serializer_2.is_valid()
-        if not flag_1 or not flag_2:
-            return response_400({**serializer_1.errors, **serializer_2.errors})
-
-        works = Works.objects.create(user=request.user, **serializer_1.validated_data)
-        question = WorksQuestion.objects.create(works=works, **serializer_2.validated_data)
-        return response_200(question.details())
+        serializer = WorksAndQuestionSerializer(data=request.data)
+        if not serializer.is_valid():
+            return response_400(serializer.errors)
+        works = Works.objects.create(
+            user=request.user, type=serializer.validated_data.get('type', None),
+            storage=serializer.validated_data['storage'], summary=serializer.validated_data.get('summary', ''),
+            location=serializer.validated_data.get('location', ''))
+        to = serializer.validated_data.get('to', None)
+        if to:
+            WorksQuestion.objects.create(works=works, to_id=to, question=serializer.validated_data.get('question', ''))
+        return response_200(works.details())
