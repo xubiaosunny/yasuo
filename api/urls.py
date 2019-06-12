@@ -22,6 +22,7 @@ urlpatterns = [
     path('works/<int:_id>/comment/', works.WorksCommentView.as_view()),
     path('works/<int:_id>/question/', works.WorksQuestionView.as_view()),
     path('works/question/', works.WorksDirectQuestionView.as_view()),
+    path('works/question/<int:_id>/reply', works.WorksQuestionReplyView.as_view()),
 
     path('home/', home.IndexView.as_view()),
 ]

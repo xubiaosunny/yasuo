@@ -9,7 +9,8 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ('full_name', 'province', 'city', 'role', 'grade', 'work_place', 'id_number', 'certified_file')
+        fields = ('full_name', 'province', 'city', 'role', 'grade', 'work_place', 'avatar', 'id_number',
+                  'certified_file')
 
     def validate_certified_file(self, value):
         if not value:
@@ -31,14 +32,16 @@ class UserInfoSerializer(serializers.ModelSerializer):
         instance.role = validated_data.get('role', instance.role)
         instance.grade = validated_data.get('grade', instance.grade)
         instance.work_place = validated_data.get('work_place', instance.work_place)
+        instance.avatar = validated_data.get('avatar', instance.work_place)
         instance.save()
-        if self.validated_data.get('role', None) == CustomUser.ROLE_CHOICES[0][0]:
-            certification_data = {
-                'id_number': validated_data.get('id_number', ''),
-                'certified_file': validated_data.get('certified_file', None),
-                'status': Certification.STATUS_CHOICES[0][0]
-            }
-            Certification.objects.update_or_create(user=instance, defaults=certification_data)
+        if instance.role == CustomUser.ROLE_CHOICES[0][0]:
+            if not Certification.objects.filter(user=instance).exists():
+                certification_data = {
+                    'id_number': validated_data.get('id_number', ''),
+                    'certified_file': validated_data.get('certified_file', None),
+                    'status': Certification.STATUS_CHOICES[0][0]
+                }
+                Certification.objects.update_or_create(user=instance, defaults=certification_data)
         return instance
 
 

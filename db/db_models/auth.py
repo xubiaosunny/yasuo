@@ -61,6 +61,8 @@ class CustomUser(AbstractBaseUser):
     role = models.CharField(choices=ROLE_CHOICES, max_length=5, null=True, blank=True)
     province = models.CharField(_('province'), max_length=100, null=True, blank=True)
     city = models.CharField(_('city'), max_length=100, null=True, blank=True)
+    avatar = models.ForeignKey('LocalStorage', default=None, null=True, blank=True, on_delete=models.PROTECT,
+                               verbose_name=_('Avatar'))
 
     follow = models.ManyToManyField('self', symmetrical=False)
     credit = models.DecimalField(max_digits=19, decimal_places=3, default=0)
@@ -105,7 +107,8 @@ class CustomUser(AbstractBaseUser):
         return self.full_name or self.phone
 
     def to_dict(self, detail=False):
-        data = model_to_dict(self, exclude=['password', 'follow'])
+        data = model_to_dict(self, exclude=['password', 'follow', 'avatar'])
+        data['avatar_url'] = self.avatar.file.url if self.avatar else ''
         if detail:
             data['my_follow'] = [u.to_dict() for u in self.follow.all()],
             data['follow_me'] = [u.to_dict() for u in self.customuser_set.all()]

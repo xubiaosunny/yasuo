@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.utils.translation import gettext as _
 from django.core.exceptions import ObjectDoesNotExist
-from db.models import Works, WorksComment, WorksQuestion, CustomUser
+from db.models import Works, WorksComment, WorksQuestion, CustomUser, WorksQuestionReply
 
 
 
@@ -51,4 +51,15 @@ class WorksAndQuestionSerializer(serializers.ModelSerializer):
 
         if user.role != CustomUser.ROLE_CHOICES[0][0]:
             raise serializers.ValidationError(_('Only ask the teacher questions'))
+        return value
+
+
+class WorksQuestionReplySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorksQuestionReply
+        fields = ('voice', )
+
+    def validate_voice(self, value):
+        if not value.type.startswith('audio'):
+            raise serializers.ValidationError(_('The file type is incorrect, Please upload an audio'))
         return value

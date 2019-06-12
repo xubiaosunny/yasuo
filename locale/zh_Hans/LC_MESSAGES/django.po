@@ -167,3 +167,9 @@ msgstr "用户不存在"
 
 msgid "Only ask the teacher questions"
 msgstr "只能向老师提问"
+
+msgid "Avatar"
+msgstr "头像"
+
+msgid "Can't reply to the question"
+msgstr "不能回复该提问"

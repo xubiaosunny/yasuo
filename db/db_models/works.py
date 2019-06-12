@@ -71,6 +71,7 @@ class WorksComment(models.Model):
     def details(self):
         data = dict()
         data['id'] = self.id
+        data['user'] = self.user.to_dict()
         # data['works'] = self.works.details()
         data['comment'] = self.voice.details()
         data['is_pay'] = self.is_pay
@@ -114,3 +115,11 @@ class WorksQuestionReply(models.Model):
     class Meta:
         verbose_name = _('Works Question Reply')
         verbose_name_plural = _('Works Question Reply')
+
+    def details(self):
+        data = dict()
+        data['id'] = self.id
+        data['works_question'] = self.works_question_id
+        data['voice'] = self.voice.details()
+        data['create_time'] = self.create_time
+        return data

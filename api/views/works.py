@@ -8,8 +8,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from utils.common.response import *
 from utils.common.permissions import IsTeacher, IsStudent, my_permission_classes
 from api.serializer.works import WorksSerializer, WorksCommentSerializer, WorksQuestionSerializer, \
-    WorksAndQuestionSerializer
-from db.models import Works, WorksComment, WorksQuestion
+    WorksAndQuestionSerializer, WorksQuestionReplySerializer
+from db.models import Works, WorksComment, WorksQuestion, WorksQuestionReply
 
 
 class WorksCategoryView(generics.GenericAPIView):
@@ -139,3 +139,27 @@ class WorksDirectQuestionView(generics.GenericAPIView):
         if to:
             WorksQuestion.objects.create(works=works, to_id=to, question=serializer.validated_data.get('question', ''))
         return response_200(works.details())
+
+
+class WorksQuestionReplyView(generics.GenericAPIView):
+    serializer_class = WorksQuestionReplySerializer
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request, _id):
+        """获取_id的提问的所有回复"""
+        reply_s = WorksQuestionReply.objects.filter(works_question_id=_id)
+        return response_200({'reply': [reply.details() for reply in reply_s]})
+
+    @my_permission_classes((IsTeacher,))
+    def post(self, request, _id):
+        """
+        对提问进行回复
+        """
+        question = get_object_or_404(WorksQuestion, pk=_id)
+        if question.to != request.user:
+            return response_403(_("Can't reply to the question"))
+        serializer = WorksQuestionReplySerializer(data=request.data)
+        if not serializer.is_valid():
+            return response_400(serializer.errors)
+        question_reply = WorksQuestionReply.objects.create(works_question=question, **serializer.validated_data)
+        return response_200(question_reply.details())
