@@ -173,3 +173,6 @@ msgstr "头像"
 
 msgid "Can't reply to the question"
 msgstr "不能回复该提问"
+
+msgid "Title"
+msgstr "标题"

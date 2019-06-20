@@ -21,6 +21,7 @@ class Works(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
     type = models.CharField(_('Type'), choices=TYPE_CHOICES, max_length=50, null=True, blank=True)
     storage = models.ForeignKey(LocalStorage, on_delete=models.PROTECT)
+    title = models.CharField(_('Title'), max_length=50, default='', blank=True)
     summary = models.TextField(_('Summary'), default='', blank=True)
     favorite = models.ManyToManyField(CustomUser, related_name='favorite_works')
     location = models.CharField(_('Location'), max_length=50, null=True, blank=True, db_index=True)
@@ -36,6 +37,7 @@ class Works(models.Model):
         data['id'] = self.id
         data['user_id'] = self.user_id
         data['type'] = self.type
+        data['type_display'] = self.get_type_display()
         data['storage'] = self.storage.details()
         data['summary'] = self.summary
         data['favorite_number'] = self.favorite.count()

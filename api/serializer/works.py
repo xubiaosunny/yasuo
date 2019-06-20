@@ -4,11 +4,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from db.models import Works, WorksComment, WorksQuestion, CustomUser, WorksQuestionReply
 
 
-
 class WorksSerializer(serializers.ModelSerializer):
     class Meta:
         model = Works
-        fields = ('type', 'storage', 'summary', 'location')
+        fields = ('type', 'storage', 'title', 'summary', 'location')
 
     def validate_storage(self, value):
         if not value.type.startswith('image') and not value.type.startswith('video'):
