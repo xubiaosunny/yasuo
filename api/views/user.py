@@ -79,7 +79,7 @@ class UserInfoView(generics.GenericAPIView):
     用户信息
     """
     serializer_class = UserInfoSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
     def get(self, request):
         """
@@ -90,9 +90,10 @@ class UserInfoView(generics.GenericAPIView):
         if user_id:
             user = get_object_or_404(CustomUser, pk=user_id)
         else:
+            if request.user.is_anonymous:
+                return response_403()
             user = request.user
-
-        return response_200(user.to_dict())
+        return response_200(user.to_dict(guest=request.user))
 
     def patch(self, request):
         """更新用户信息"""

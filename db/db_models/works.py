@@ -36,9 +36,11 @@ class Works(models.Model):
         data = dict()
         data['id'] = self.id
         data['user_id'] = self.user_id
+        data['user'] = self.user.to_dict()
         data['type'] = self.type
         data['type_display'] = self.get_type_display()
         data['storage'] = self.storage.details()
+        data['title'] = self.title
         data['summary'] = self.summary
         data['favorite_number'] = self.favorite.count()
         data['comment_number'] = self.workscomment_set.count()

@@ -106,12 +106,22 @@ class CustomUser(AbstractBaseUser):
     def get_username(self):
         return self.full_name or self.phone
 
-    def to_dict(self, detail=False):
+    def to_dict(self, detail=False, guest=None):
         data = model_to_dict(self, exclude=['password', 'follow', 'avatar'])
         data['avatar_url'] = self.avatar.file.url if self.avatar else ''
         if detail:
             data['my_follow'] = [u.to_dict() for u in self.follow.all()],
             data['follow_me'] = [u.to_dict() for u in self.customuser_set.all()]
+        data['follow_me_count'] = self.customuser_set.count()
+        if self.role == CustomUser.ROLE_CHOICES[0][0]:
+            data['reply_question_count'] = self.worksquestion_set.count()
+        else:
+            data['question_count'] = sum([w.worksquestion_set.count() for w in self.works_set.filter(is_delete=False)])
+        if guest:
+            if guest.is_anonymous:
+                data['is_followed'] = False
+            else:
+                data['is_followed'] = self.customuser_set.filter(pk=guest.id).exists()
         return data
 
 
