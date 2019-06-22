@@ -176,3 +176,12 @@ msgstr "不能回复该提问"
 
 msgid "Title"
 msgstr "标题"
+
+msgid "User Authentication"
+msgstr "用户认证"
+
+msgid "Preview"
+msgstr "预览"
+
+msgid "Status"
+msgstr "状态"

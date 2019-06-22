@@ -2,8 +2,10 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy as _
 
-from db.models import CustomUser, SMSCode
+from db.models import CustomUser, SMSCode, Certification
 
 
 class UserCreationForm(forms.ModelForm):
@@ -81,6 +83,18 @@ class UserAdmin(BaseUserAdmin):
     def has_delete_permission(self, request, obj=None):
         """ 取消后台删除用户功能 """
         return False
+
+
+class CertificationAdmin(admin.ModelAdmin):
+    def certified_file_img(self, obj):
+        return mark_safe('<img src="%s" width="500px" />' % (obj.certified_file.get_url(),))
+
+    certified_file_img.short_description = _('Preview')
+    certified_file_img.allow_tags = True
+
+    list_display = ('id', 'user', 'id_number', 'status', 'create_time', 'update_time')
+    readonly_fields = ['user', 'certified_file_img']
+    list_filter = ('status',)
 
 
 class SMSCodeAdmin(admin.ModelAdmin):

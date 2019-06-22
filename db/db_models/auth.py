@@ -137,9 +137,13 @@ class Certification(models.Model):
     id_number = models.CharField(_('ID Number'), max_length=100, blank=True)
     certified_file = models.ForeignKey(LocalStorage, on_delete=models.PROTECT, null=True)
     status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=20)
-    reject_cause = models.TextField(_('Reject Cause'))
+    reject_cause = models.TextField(_('Reject Cause'), default='', blank=True)
     create_time = models.DateTimeField(_('Create Time'), auto_now_add=True, blank=True)
     update_time = models.DateTimeField(_('Update Time'), auto_now=True, blank=True)
+
+    class Meta:
+        verbose_name = _('User Authentication')
+        verbose_name_plural = _('User Authentication')
 
     def detail(self):
         data = model_to_dict(self, fields=['user', 'id_number', 'reject_cause'])
