@@ -26,6 +26,7 @@ class Works(models.Model):
     favorite = models.ManyToManyField(CustomUser, related_name='favorite_works')
     location = models.CharField(_('Location'), max_length=50, null=True, blank=True, db_index=True)
     create_time = models.DateTimeField(_('Create Time'), auto_now_add=True)
+    is_ad = models.BooleanField(default=False)
     is_delete = models.BooleanField(default=False)
 
     class Meta:
