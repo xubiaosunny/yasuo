@@ -63,6 +63,7 @@ class CustomUser(AbstractBaseUser):
     city = models.CharField(_('city'), max_length=100, null=True, blank=True)
     avatar = models.ForeignKey('LocalStorage', default=None, null=True, blank=True, on_delete=models.PROTECT,
                                verbose_name=_('Avatar'))
+    introduction = models.TextField(_('Introduction'), default='', blank=True)
 
     follow = models.ManyToManyField('self', symmetrical=False)
     credit = models.DecimalField(max_digits=19, decimal_places=3, default=0)

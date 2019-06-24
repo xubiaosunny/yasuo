@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 
 from api.serializer.user import UserInfoSerializer, UserFollowSerializer
 from utils.common.response import *
-from db.db_models.auth import CustomUser, Certification
+from db.models import CustomUser, Works
 from db.const import CITY
 
 
@@ -147,3 +147,22 @@ class UserFollowView(generics.GenericAPIView):
             return response_400(serializer.errors)
         request.user.follow.remove(serializer.data['user_id'])
         return response_200(request.data)
+
+
+class UserWorksView(generics.GenericAPIView):
+    """
+    用户作品
+    可选GET参数`storage_type`：
+        * image: 图片
+        * video: 视频
+    """
+    serializer_class = UserFollowSerializer
+    permission_classes = (AllowAny,)
+
+    def get(self, request, _id):
+        storage_type = request.GET.get('storage_type', None)
+        works_s = Works.objects.filter(is_delete=False, user_id=_id)
+        if storage_type:
+            works_s = works_s.filter(storage__type__startswith=storage_type)
+
+        return response_200({'works': [w.details() for w in works_s]})

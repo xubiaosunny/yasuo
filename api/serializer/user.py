@@ -9,7 +9,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ('full_name', 'province', 'city', 'role', 'grade', 'work_place', 'avatar', 'id_number',
+        fields = ('full_name', 'province', 'city', 'role', 'grade', 'work_place', 'avatar', 'introduction', 'id_number',
                   'certified_file')
 
     def validate_certified_file(self, value):
@@ -32,7 +32,8 @@ class UserInfoSerializer(serializers.ModelSerializer):
         instance.role = validated_data.get('role', instance.role)
         instance.grade = validated_data.get('grade', instance.grade)
         instance.work_place = validated_data.get('work_place', instance.work_place)
-        instance.avatar = validated_data.get('avatar', instance.work_place)
+        instance.avatar = validated_data.get('avatar', instance.avatar)
+        instance.introduction = validated_data.get('introduction', instance.introduction)
         instance.save()
         if instance.role == CustomUser.ROLE_CHOICES[0][0]:
             if not Certification.objects.filter(user=instance).exists():

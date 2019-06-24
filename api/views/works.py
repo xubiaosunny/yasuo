@@ -133,6 +133,7 @@ class WorksDirectQuestionView(generics.GenericAPIView):
             return response_400(serializer.errors)
         works = Works.objects.create(
             user=request.user, type=serializer.validated_data.get('type', None),
+            title=serializer.validated_data.get('title', ''),
             storage=serializer.validated_data['storage'], summary=serializer.validated_data.get('summary', ''),
             location=serializer.validated_data.get('location', ''))
         to = serializer.validated_data.get('to', None)
