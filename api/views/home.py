@@ -14,7 +14,7 @@ INDEX_SQL = """SELECT w.*, c.comment_conut
     ) c
 RIGHT JOIN db_works w
 on w.id=c.works_id
-where w.is_delete is false
+where w.is_delete is false AND w.is_private IS FALSE 
 order by c.comment_conut DESC
 LIMIT %s, %s;
 """

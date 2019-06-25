@@ -26,6 +26,7 @@ class Works(models.Model):
     favorite = models.ManyToManyField(CustomUser, related_name='favorite_works')
     location = models.CharField(_('Location'), max_length=50, null=True, blank=True, db_index=True)
     create_time = models.DateTimeField(_('Create Time'), auto_now_add=True)
+    is_private = models.BooleanField(default=False)
     is_ad = models.BooleanField(default=False)
     is_delete = models.BooleanField(default=False)
 
@@ -46,6 +47,8 @@ class Works(models.Model):
         data['favorite_number'] = self.favorite.count()
         data['comment_number'] = self.workscomment_set.count()
         data['location'] = self.location
+        data['is_private'] = self.is_private
+        data['is_ad'] = self.is_ad
         data['create_time'] = self.create_time
 
         if user:

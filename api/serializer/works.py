@@ -38,7 +38,7 @@ class WorksAndQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Works
-        fields = ('type', 'storage', 'title', 'summary', 'location', 'to', 'question')
+        fields = ('type', 'storage', 'title', 'summary', 'location', 'to', 'question', 'is_private')
 
     def validate_to(self, value):
         try:

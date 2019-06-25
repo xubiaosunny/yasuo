@@ -135,7 +135,8 @@ class WorksDirectQuestionView(generics.GenericAPIView):
             user=request.user, type=serializer.validated_data.get('type', None),
             title=serializer.validated_data.get('title', ''),
             storage=serializer.validated_data['storage'], summary=serializer.validated_data.get('summary', ''),
-            location=serializer.validated_data.get('location', ''))
+            location=serializer.validated_data.get('location', ''),
+            is_private=serializer.validated_data.get('is_private', False),)
         to = serializer.validated_data.get('to', None)
         if to:
             WorksQuestion.objects.create(works=works, to_id=to, question=serializer.validated_data.get('question', ''))
