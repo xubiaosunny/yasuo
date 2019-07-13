@@ -166,3 +166,41 @@ class UserWorksView(generics.GenericAPIView):
             works_s = works_s.filter(storage__type__startswith=storage_type)
 
         return response_200({'works': [w.details() for w in works_s]})
+
+
+class UserFollowTeacherView(generics.GenericAPIView):
+    """
+    用户关注的老师
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        teachers = request.user.follow.filter(role=CustomUser.ROLE_CHOICES[0][0])
+        recommends = CustomUser.objects.filter(role=CustomUser.ROLE_CHOICES[0][0]).exclude(
+            pk__in=teachers).exclude(pk=request.user.id).order_by('?')[:5]
+        return response_200({'users': [u.to_dict() for u in teachers], 'recommends': [u.to_dict() for u in recommends]})
+
+
+class UserFollowStudentView(generics.GenericAPIView):
+    """
+    用户关注的学生
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        students = request.user.follow.filter(role=CustomUser.ROLE_CHOICES[1][0])
+        recommends = CustomUser.objects.filter(role=CustomUser.ROLE_CHOICES[1][0]).exclude(
+            pk__in=students).exclude(pk=request.user.id).order_by('?')[:5]
+        return response_200({'users': [u.to_dict() for u in students], 'recommends': [u.to_dict() for u in recommends]})
+
+
+class UserFollowWorksView(generics.GenericAPIView):
+    """
+    用户关注的人的最新动态
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        follows = request.user.follow.all()
+        works_s = Works.objects.filter(user__in=follows, is_delete=False).order_by('-create_time')
+        return response_200({'works': [works.details(user=request.user) for works in works_s]})

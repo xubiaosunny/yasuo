@@ -14,6 +14,9 @@ urlpatterns = [
     path('user/all_workspace_of_teachers/', user.UserAllWorkspaceOfTeacherView.as_view()),
     path('user/teachers_of_workspace/', user.UserTeacherOfWorkspaceView.as_view()),
     path('user/<int:_id>/works/', user.UserWorksView.as_view()),
+    path('user/follow/teacher', user.UserFollowTeacherView.as_view()),
+    path('user/follow/student', user.UserFollowStudentView.as_view()),
+    path('user/follow/works', user.UserFollowWorksView.as_view()),
 
     path('storage/local_storage/', storage.LocalStorageView.as_view()),
 
