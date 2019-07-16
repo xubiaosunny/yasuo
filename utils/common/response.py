@@ -30,3 +30,7 @@ def response_400(data, msg='Invalid Params'):
 
 def response_404(msg='Not Found'):
     return Response({"msg": msg}, status=HTTP_404_NOT_FOUND)
+
+
+def response_403(detail='Forbidden'):
+    return Response({"detail": detail}, status=HTTP_404_NOT_FOUND)

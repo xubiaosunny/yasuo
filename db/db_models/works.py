@@ -11,13 +11,23 @@ class Works(models.Model):
     from .auth import CustomUser
     from .storage import LocalStorage
 
+    TYPE_CHOICES = (
+        ('Drawing', _('Drawing')),
+        ('Color', _('Color')),
+        ('Sketch', _('Sketch')),
+        ('Constitute', _('Constitute'))
+    )
+
     user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
-    type = models.CharField(_('Type'), max_length=50, null=True, blank=True)
+    type = models.CharField(_('Type'), choices=TYPE_CHOICES, max_length=50, null=True, blank=True)
     storage = models.ForeignKey(LocalStorage, on_delete=models.PROTECT)
+    title = models.CharField(_('Title'), max_length=50, default='', blank=True)
     summary = models.TextField(_('Summary'), default='', blank=True)
     favorite = models.ManyToManyField(CustomUser, related_name='favorite_works')
     location = models.CharField(_('Location'), max_length=50, null=True, blank=True, db_index=True)
     create_time = models.DateTimeField(_('Create Time'), auto_now_add=True)
+    is_private = models.BooleanField(default=False)
+    is_ad = models.BooleanField(default=False)
     is_delete = models.BooleanField(default=False)
 
     class Meta:
@@ -28,11 +38,17 @@ class Works(models.Model):
         data = dict()
         data['id'] = self.id
         data['user_id'] = self.user_id
+        data['user'] = self.user.to_dict()
         data['type'] = self.type
+        data['type_display'] = self.get_type_display()
         data['storage'] = self.storage.details()
+        data['title'] = self.title
         data['summary'] = self.summary
         data['favorite_number'] = self.favorite.count()
+        data['comment_number'] = self.workscomment_set.count()
         data['location'] = self.location
+        data['is_private'] = self.is_private
+        data['is_ad'] = self.is_ad
         data['create_time'] = self.create_time
 
         if user:
@@ -63,7 +79,8 @@ class WorksComment(models.Model):
     def details(self):
         data = dict()
         data['id'] = self.id
-        data['works'] = self.works.details()
+        data['user'] = self.user.to_dict()
+        # data['works'] = self.works.details()
         data['comment'] = self.voice.details()
         data['is_pay'] = self.is_pay
         data['create_time'] = self.create_time
@@ -84,6 +101,17 @@ class WorksQuestion(models.Model):
         verbose_name = _('Works Question')
         verbose_name_plural = _('Works Question')
 
+    def details(self):
+        data = dict()
+        data['id'] = self.id
+        # data['works'] = self.works.details()
+        data['works_id'] = self.works_id
+        data['to'] = self.to.to_dict()
+        data['question'] = self.question
+        data['is_pay'] = self.is_pay
+        data['create_time'] = self.create_time
+        return data
+
 
 class WorksQuestionReply(models.Model):
     from .storage import LocalStorage
@@ -95,3 +123,11 @@ class WorksQuestionReply(models.Model):
     class Meta:
         verbose_name = _('Works Question Reply')
         verbose_name_plural = _('Works Question Reply')
+
+    def details(self):
+        data = dict()
+        data['id'] = self.id
+        data['works_question'] = self.works_question_id
+        data['voice'] = self.voice.details()
+        data['create_time'] = self.create_time
+        return data

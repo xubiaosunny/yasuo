@@ -61,6 +61,9 @@ class CustomUser(AbstractBaseUser):
     role = models.CharField(choices=ROLE_CHOICES, max_length=5, null=True, blank=True)
     province = models.CharField(_('province'), max_length=100, null=True, blank=True)
     city = models.CharField(_('city'), max_length=100, null=True, blank=True)
+    avatar = models.ForeignKey('LocalStorage', default=None, null=True, blank=True, on_delete=models.PROTECT,
+                               verbose_name=_('Avatar'))
+    introduction = models.TextField(_('Introduction'), default='', blank=True)
 
     follow = models.ManyToManyField('self', symmetrical=False)
     credit = models.DecimalField(max_digits=19, decimal_places=3, default=0)
@@ -69,7 +72,7 @@ class CustomUser(AbstractBaseUser):
     grade = models.IntegerField(choices=GRADE_CHOICES, null=True, blank=True)
 
     # teacher info
-    work_place = models.CharField(_('Work Place'), max_length=255, default='', blank=True)
+    work_place = models.CharField(_('Work Place'), max_length=255, default='', blank=True, db_index=True)
 
     objects = CustomUserManager()
     USERNAME_FIELD = 'phone'
@@ -104,13 +107,24 @@ class CustomUser(AbstractBaseUser):
     def get_username(self):
         return self.full_name or self.phone
 
-    def to_dict(self, detail=False):
-        data = model_to_dict(self, exclude=['password', 'follow'])
+    def to_dict(self, detail=False, guest=None):
+        data = model_to_dict(self, exclude=['password', 'follow', 'avatar'])
+        data['avatar_url'] = self.avatar.file.url if self.avatar else ''
         data['grade_display'] = self.get_grade_display()
         data['role_display'] = self.get_role_display()
         if detail:
             data['my_follow'] = [u.to_dict() for u in self.follow.all()],
             data['follow_me'] = [u.to_dict() for u in self.customuser_set.all()]
+        data['follow_me_count'] = self.customuser_set.count()
+        if self.role == CustomUser.ROLE_CHOICES[0][0]:
+            data['reply_question_count'] = self.worksquestion_set.count()
+        else:
+            data['question_count'] = sum([w.worksquestion_set.count() for w in self.works_set.filter(is_delete=False)])
+        if guest:
+            if guest.is_anonymous:
+                data['is_followed'] = False
+            else:
+                data['is_followed'] = self.customuser_set.filter(pk=guest.id).exists()
         return data
 
 
@@ -126,9 +140,13 @@ class Certification(models.Model):
     id_number = models.CharField(_('ID Number'), max_length=100, blank=True)
     certified_file = models.ForeignKey(LocalStorage, on_delete=models.PROTECT, null=True)
     status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=20)
-    reject_cause = models.TextField(_('Reject Cause'))
+    reject_cause = models.TextField(_('Reject Cause'), default='', blank=True)
     create_time = models.DateTimeField(_('Create Time'), auto_now_add=True, blank=True)
     update_time = models.DateTimeField(_('Update Time'), auto_now=True, blank=True)
+
+    class Meta:
+        verbose_name = _('User Authentication')
+        verbose_name_plural = _('User Authentication')
 
     def detail(self):
         data = model_to_dict(self, fields=['user', 'id_number', 'reject_cause'])

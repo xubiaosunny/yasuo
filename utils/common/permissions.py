@@ -1,9 +1,25 @@
 from rest_framework.permissions import BasePermission
 import hashlib
 import datetime
+import functools
 
 from db.models import CustomUser
 from yasuo.config import ACCESS_KEY
+
+
+def my_permission_classes(permission_classes):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(self, request, *args, **kwargs):
+            for permission_class in permission_classes:
+                permission = permission_class()
+                if not permission.has_permission(request, self):
+                    self.permission_denied(
+                        request, message=getattr(permission, 'message', None)
+                    )
+            return func(self, request, *args, **kwargs)
+        return wrapper
+    return decorator
 
 
 class SignaturePermission(BasePermission):
