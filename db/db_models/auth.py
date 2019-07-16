@@ -106,6 +106,8 @@ class CustomUser(AbstractBaseUser):
 
     def to_dict(self, detail=False):
         data = model_to_dict(self, exclude=['password', 'follow'])
+        data['grade_display'] = self.get_grade_display()
+        data['role_display'] = self.get_role_display()
         if detail:
             data['my_follow'] = [u.to_dict() for u in self.follow.all()],
             data['follow_me'] = [u.to_dict() for u in self.customuser_set.all()]
