@@ -19,6 +19,7 @@ celery = {extras = ["librabbitmq"],version = "*"}
 pillow = "*"
 jpush = "*"
 pydub = "*"
+python-alipay-sdk = "*"
 
 [requires]
 python_version = "3.7"
