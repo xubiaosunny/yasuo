@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from db.models import CustomUser
 from django.conf import settings
-from django.views.generic import View
+from rest_framework import generics
 from db.db_models.pay import *
 from api.serializer.pay import OrderInfoSerializer, OrderCheckSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -13,9 +13,13 @@ from yasuo.config import SITE_DOMAIN
 import os
 import time
 import decimal
+from rest_framework import serializers
 
 
-class AliPayNotifyView(View):
+class AliPayNotifyView(generics.GenericAPIView):
+	serializer_class = serializers.Serializer
+	permission_classes = (AllowAny,)
+
 	def post(self, request):
 		print(time.time())
 		print(request.POST)
@@ -39,7 +43,7 @@ class AliPayNotifyView(View):
 # ajax post
 # 前端传递的参数：订单ID（order_id）
 # order/pay
-class OrderPayView(View):
+class OrderPayView(generics.GenericAPIView):
 	"""订单支付"""
 	serializer_class = OrderInfoSerializer
 	permission_classes = (IsAuthenticated,)
@@ -122,7 +126,7 @@ class OrderPayView(View):
 # ajas post
 # 前端传递的参数：订单ID（order_id）
 # /order/check
-class CheckPayView(View):
+class CheckPayView(generics.GenericAPIView):
 	"""查看订单支付结果"""
 	serializer_class = OrderCheckSerializer
 	permission_classes = (IsAuthenticated,)
@@ -219,7 +223,7 @@ class CheckPayView(View):
 #ajas post
 # 前端传递的参数：支付宝账户（payee_account）
 # /order/check
-class ExtractPayVIew(View):
+class ExtractPayVIew(generics.GenericAPIView):
 	"""提取账户余额到支付宝"""
 	def post(self, request):
 		# 用户是否登陆

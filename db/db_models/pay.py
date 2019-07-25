@@ -28,10 +28,7 @@ class OrderInfo(models.Model):
     pay_method = models.SmallIntegerField(choices=PAY_METHOD_CHOICES, default=1, verbose_name="支付方式")
     amount = models.DecimalField(max_digits=10, decimal_places=3, verbose_name='价格')
     trade_status = models.SmallIntegerField(choices=ORDER_STATUS_CHOICES, default=1, verbose_name='支付状态')
-    pay_item_class = models.CharField(choices=PAY_ITEM_CLASS_CHOICES, verbose_name="所支付类名")
+    pay_item_class = models.CharField(max_length=50,choices=PAY_ITEM_CLASS_CHOICES, verbose_name="所支付类名")
     pay_item_id = models.IntegerField(verbose_name='所支付的id')
     create_time = models.DateTimeField(_('Create Time'), auto_now_add=True, blank=True)
     uodate_time = models.DateTimeField(_('Update Time'), auto_now=True, blank=True)
-
-    def __str__(self):
-        return self.order_id
