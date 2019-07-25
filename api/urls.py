@@ -1,6 +1,6 @@
 from django.urls import path
 
-from api.views import auth, user, storage, works, home
+from api.views import auth, user, storage, works, home, pay
 
 urlpatterns = [
     path('auth/send_sms_code/', auth.SendCodeView.as_view()),
@@ -29,4 +29,9 @@ urlpatterns = [
     path('works/question/<int:_id>/reply', works.WorksQuestionReplyView.as_view()),
 
     path('home/', home.IndexView.as_view()),
+
+    path('order/', pay.OrderPayView.as_view()),
+    path('order/check_pay/', pay.CheckPayView.as_view()),
+    path('order/alipay_notifiy/', pay.AliPayNotifyView.as_view()),
+
 ]
