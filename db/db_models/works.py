@@ -85,6 +85,7 @@ class WorksComment(models.Model):
         data['is_pay'] = self.is_pay
         data['create_time'] = self.create_time
         data['update_time'] = self.update_time
+        data['can_question'] = self.is_pay and WorksQuestion.objects.filter(works=self.works, to=self.user).count() == 0
         return data
 
 
