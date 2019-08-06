@@ -6,6 +6,7 @@ from api.serializer.user import UserInfoSerializer, UserFollowSerializer
 from utils.common.response import *
 from db.models import CustomUser, Works
 from db.const import CITY
+from utils.tasks.push import *
 
 
 class UserCityView(generics.GenericAPIView):
@@ -136,6 +137,7 @@ class UserFollowView(generics.GenericAPIView):
         if not serializer.is_valid():
             return response_400(serializer.errors)
         request.user.follow.add(serializer.data['user_id'])
+        send_push_j([serializer.data['user_id']], '%s关注了你' % (request.user.full_name or request.user.phone, ))
         return response_200(request.user.to_dict())
 
     def delete(self, request):
