@@ -9,7 +9,6 @@ push = _jpush.create_push()
 
 
 def push_message(tags, message):
-    print(tags, message)
     push.audience = jpush.audience({"tag": tags})
     push.notification = jpush.notification(alert=message)
     push.platform = jpush.all_
@@ -25,3 +24,6 @@ def push_message(tags, message):
         raise e
     else:
         logging.info(response.payload)
+        if response.status_code == 200 and response.payload['sendno'] == '0':
+            return True
+    return False

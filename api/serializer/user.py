@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.utils.translation import gettext as _
-from db.models import CustomUser, LocalStorage, Certification
+from db.models import CustomUser, LocalStorage, Certification, Message
 
 
 class UserInfoSerializer(serializers.ModelSerializer):

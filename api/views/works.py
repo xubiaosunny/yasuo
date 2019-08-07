@@ -9,7 +9,7 @@ from utils.common.response import *
 from utils.common.permissions import IsTeacher, IsStudent, my_permission_classes
 from api.serializer.works import WorksSerializer, WorksCommentSerializer, WorksQuestionSerializer, \
     WorksAndQuestionSerializer, WorksQuestionReplySerializer
-from db.models import Works, WorksComment, WorksQuestion, WorksQuestionReply
+from db.models import Works, WorksComment, WorksQuestion, WorksQuestionReply, Message
 from utils.tasks.push import *
 
 
@@ -64,7 +64,8 @@ class WorksFavoriteView(generics.GenericAPIView):
         """点赞"""
         works = get_object_or_404(Works, pk=_id)
         works.favorite.add(request.user)
-        send_push_j([works.user_id], '%s点赞了你的作品' % (request.user.full_name or request.user.phone,))
+        send_push_j([works.user_id], '%s点赞了你的作品' % (request.user.full_name or request.user.phone,),
+                    class_name=Message.CLASS_NAME_CHOICES[0][0], class_id=works.id)
         return response_200(works.details(user=request.user))
 
     def delete(self, request, _id):
@@ -94,7 +95,8 @@ class WorksCommentView(generics.GenericAPIView):
             WorksComment.objects.get(user=request.user, works=works)
         except ObjectDoesNotExist:
             comment = WorksComment.objects.create(user=request.user, works=works, **serializer.validated_data)
-            send_push_j([works.user_id], '%s评论了你的作品' % (request.user.full_name or request.user.phone,))
+            send_push_j(works.user_id, '%s评论了你的作品' % (request.user.full_name or request.user.phone,),
+                        class_name=Message.CLASS_NAME_CHOICES[0][0], class_id=works.id)
             return response_200(comment.details())
         except Exception as e:
             raise e
@@ -119,6 +121,8 @@ class WorksQuestionView(generics.GenericAPIView):
         if not serializer.is_valid():
             return response_400(serializer.errors)
         question = WorksQuestion.objects.create(works=works, **serializer.validated_data)
+        send_push_j(works.user_id, '%s向你提问了' % (request.user.full_name or request.user.phone,),
+                    class_name=Message.CLASS_NAME_CHOICES[1][0], class_id=question.id)
         return response_200(question.details())
 
 
@@ -167,5 +171,6 @@ class WorksQuestionReplyView(generics.GenericAPIView):
         if not serializer.is_valid():
             return response_400(serializer.errors)
         question_reply = WorksQuestionReply.objects.create(works_question=question, **serializer.validated_data)
-        send_push_j([question.works.user_id], '%s回复了你的提问' % (request.user.full_name or request.user.phone,))
+        send_push_j(question.works.user_id, '%s回复了你的提问' % (request.user.full_name or request.user.phone,),
+                    class_name=Message.CLASS_NAME_CHOICES[1][0], class_id=question.id)
         return response_200(question_reply.details())

@@ -4,9 +4,10 @@ from django.shortcuts import get_object_or_404
 
 from api.serializer.user import UserInfoSerializer, UserFollowSerializer
 from utils.common.response import *
-from db.models import CustomUser, Works
+from db.models import CustomUser, Works, Message
 from db.const import CITY
 from utils.tasks.push import *
+from rest_framework import serializers
 
 
 class UserCityView(generics.GenericAPIView):
@@ -137,7 +138,8 @@ class UserFollowView(generics.GenericAPIView):
         if not serializer.is_valid():
             return response_400(serializer.errors)
         request.user.follow.add(serializer.data['user_id'])
-        send_push_j([serializer.data['user_id']], '%s关注了你' % (request.user.full_name or request.user.phone, ))
+        send_push_j(serializer.data['user_id'], '%s关注了你' % (request.user.full_name or request.user.phone, ),
+                    class_name=Message.CLASS_NAME_CHOICES[2][0], class_id=serializer.data['user_id'])
         return response_200(request.user.to_dict())
 
     def delete(self, request):
@@ -158,7 +160,7 @@ class UserWorksView(generics.GenericAPIView):
         * image: 图片
         * video: 视频
     """
-    serializer_class = UserFollowSerializer
+    serializer_class = serializers.Serializer
     permission_classes = (AllowAny,)
 
     def get(self, request, _id):
@@ -206,3 +208,26 @@ class UserFollowWorksView(generics.GenericAPIView):
         follows = request.user.follow.all()
         works_s = Works.objects.filter(user__in=follows, is_delete=False).order_by('-create_time')
         return response_200({'works': [works.details(user=request.user) for works in works_s]})
+
+
+class UserMessageView(generics.GenericAPIView):
+    """
+    用户消息
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        messages = Message.objects.filter(user=request.user).order_by('-push_time')
+        return response_200({'messages': [message.details() for message in messages]})
+
+
+class UserMessageReadView(generics.GenericAPIView):
+    """
+    标记消息已读
+    """
+    serializer_class = serializers.Serializer
+    permission_classes = (IsAuthenticated,)
+
+    def put(self, request, _id):
+        Message.objects.filter(pk=_id).update(is_read=True)
+        return response_200({})

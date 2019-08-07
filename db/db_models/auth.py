@@ -8,7 +8,7 @@ from django.forms.models import model_to_dict
 from django.utils.translation import gettext as _
 
 
-__all__ = ['CustomUser', 'Certification', 'SMSCode']
+__all__ = ['CustomUser', 'Certification', 'SMSCode', 'Message']
 
 
 class CustomUserManager(BaseUserManager):
@@ -186,3 +186,21 @@ class SMSCode(models.Model):
         if code_records.count() == 0:
             return None
         return code_records.order_by('-id').first()
+
+
+class Message(models.Model):
+    CLASS_NAME_CHOICES = (
+        ('Works', 'Works'),
+        ('WorksQuestion', 'WorksQuestion'),
+        ('CustomUser', 'CustomUser'),
+    )
+    user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
+    message = models.CharField(_('Message'), max_length=255)
+    class_name = models.CharField(max_length=50, choices=CLASS_NAME_CHOICES)
+    class_id = models.IntegerField()
+    is_read = models.BooleanField(default=False)
+    push_time = models.DateTimeField(_('Push Time'), auto_now_add=True)
+
+    def details(self):
+        data = model_to_dict(self, exclude=[])
+        return data
