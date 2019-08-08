@@ -121,7 +121,7 @@ class WorksQuestionView(generics.GenericAPIView):
         if not serializer.is_valid():
             return response_400(serializer.errors)
         question = WorksQuestion.objects.create(works=works, **serializer.validated_data)
-        send_push_j(works.user_id, '%s向你提问了' % (request.user.full_name or request.user.phone,),
+        send_push_j(question.to_id, '%s向你提问了' % (request.user.full_name or request.user.phone,),
                     class_name=Message.CLASS_NAME_CHOICES[1][0], class_id=question.id)
         return response_200(question.details())
 
