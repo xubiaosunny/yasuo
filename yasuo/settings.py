@@ -164,23 +164,45 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {
+        'default': {
             'format': '[%(asctime)s %(filename)s:%(lineno)d %(levelname)s] - %(message)s',
             'formatTime': '%Y-%m-%d %H:%M:%S',
         }
     },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
     'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'console': {
+            'level': "INFO",
+            'class': 'logging.StreamHandler',
+            'formatter': 'default',
+        },
         'file': {
             'level': 'INFO',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': os.path.join(LOG_DIR, 'web.log'),
-            'formatter': 'verbose'
-        },
+            'when': 'D',
+            'backupCount': 10,
+            'formatter': 'default',
+        }
     },
     'loggers': {
-        'django': {
-            'handlers': ['file'],
+        '': {
+            'handlers': ['console', 'file'],
             'level': 'INFO',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['console', 'file'],
+            'level': 'ERROR',
             'propagate': True,
         }
     }

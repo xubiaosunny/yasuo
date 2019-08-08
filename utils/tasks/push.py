@@ -3,7 +3,6 @@ from utils.core.jpush import push_message
 from db.models import Message
 import logging
 
-
 __all__ = ['send_push_j']
 
 
