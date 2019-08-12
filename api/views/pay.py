@@ -35,7 +35,8 @@ class AliPayNotifyView(generics.GenericAPIView):
 		order.save()
 
 		user_items = CustomUser.objects.get(user=order.payee)
-		user_items.credit = user_items.credit + decimal.Decimal(order.amount)
+		money = order.amount / 2
+		user_items.credit = user_items.credit + decimal.Decimal(money)
 		user_items.save()
 		return Response('success')
 
@@ -60,26 +61,21 @@ class OrderPayView(generics.GenericAPIView):
 		pay_item_class = serializer.validated_data.get('pay_item_class')
 		pay_item_id = serializer.validated_data.get('pay_item_id')
 
-		# try:
-		# 	order = OrderInfo.objects.get(order_id=order_id, user=user, pay_method=2, order_status=1)
-		# except OrderInfo.DoesNotExist:
-		# 	return JsonResponse({"res": 2, 'errmas': '订单错误'})
-
 
 		#业务处理：使用sdk调用支付宝的支付接口
 		#初始化
 		app_private_key_string = open(os.path.join(settings.BASE_DIR, "app_private_key.pem")).read()
 		alipay_public_key_string = open(os.path.join(settings.BASE_DIR, "alipay_public_key.pem")).read()
 		alipay = AliPay(
-			appid="2016101000649882",
+			appid="2019080766140322",
 			app_notify_url=SITE_DOMAIN + '/api/order/alipay_notifiy/',
 			# app_private_key_path=os.path.join(settings.BASE_DIR, 'apps/blog/app_private_key.pem'),
 			app_private_key_string=app_private_key_string,
 			# alipay_public_key_path=os.path.join(settings.BASE_DIR, 'apps/blog/alipay_public_key.pem'),
 			alipay_public_key_string=alipay_public_key_string,
 			sign_type="RSA2",
-			# debug=False    #不是调试模式，访问实际环境地址
-			debug=True  # 沙箱开发环境
+			debug=False    #不是调试模式，访问实际环境地址
+			# debug=True  # 沙箱开发环境
 		)
 
 		user = request.user
@@ -147,15 +143,15 @@ class CheckPayView(generics.GenericAPIView):
 		app_private_key_string = open(os.path.join(settings.BASE_DIR, "app_private_key.pem")).read()
 		alipay_public_key_string = open(os.path.join(settings.BASE_DIR, "alipay_public_key.pem")).read()
 		alipay = AliPay(
-			appid="2016101000649882",
+			appid="2019080766140322",
 			app_notify_url=SITE_DOMAIN + '/api/order/alipay_notifiy/',
 			# app_private_key_path=os.path.join(settings.BASE_DIR, 'apps/blog/app_private_key.pem'),
 			app_private_key_string=app_private_key_string,
 			# alipay_public_key_path=os.path.join(settings.BASE_DIR, 'apps/blog/alipay_public_key.pem'),
 			alipay_public_key_string=alipay_public_key_string,
 			sign_type="RSA2",
-			# debug=False    #不是调试模式，访问实际环境地址
-			debug=True    #沙箱开发环境
+			debug=False    #不是调试模式，访问实际环境地址
+			# debug=True    #沙箱开发环境
 		)
 
 		user = request.user
@@ -205,6 +201,7 @@ class CheckPayView(generics.GenericAPIView):
 
 				# 增加被支付者钱包金额
 				# user_items = CustomUser.objects.get(user=payee)
+				# invoice_amount = invoice_amount / 2
 				# user_items.credit = user_items.credit + decimal.Decimal(invoice_amount)
 				# user_items.save()
 
@@ -248,15 +245,15 @@ class ExtractPayVIew(generics.GenericAPIView):
 						-----END PUBLIC KEY-----
 						"""
 		alipay = AliPay(
-			appid="2016101000649882",
+			appid="2019080766140322",
 			app_notify_url=None,
 			# app_private_key_path=os.path.join(settings.BASE_DIR, 'apps/blog/app_private_key.pem'),
 			app_private_key_path=app_private_key_string,
 			# alipay_public_key_path=os.path.join(settings.BASE_DIR, 'apps/blog/alipay_public_key.pem'),
 			alipay_public_key_path=alipay_public_key_string,
 			sign_type="RSA2",
-			# debug=False    #不是调试模式，访问实际环境地址
-			debug=True  # 沙箱开发环境
+			debug=False    #不是调试模式，访问实际环境地址
+			# debug=True  # 沙箱开发环境
 		)
 
 		# 接受参数
