@@ -113,9 +113,9 @@ class OrderPayView(generics.GenericAPIView):
         # pay_url = 'https://openapi.alipay.com/gateway.do?' + order_string
 
         # 沙箱
-        pay_url = 'https://openapi.alipaydev.com/gateway.do?' + order_string
+        # pay_url = 'https://openapi.alipaydev.com/gateway.do?' + order_string
 
-        return JsonResponse({'res': 3, 'pay_url': pay_url})
+        return JsonResponse({'res': 3, 'order_string': order_string})
 
 
 # 付款之后紧接调用此函数，查询订单是否完成，给老师钱包增加金额，返回可以读取评论字段
