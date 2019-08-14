@@ -86,22 +86,23 @@ class OrderPayView(generics.GenericAPIView):
 
         user = request.user
         order_no = datetime.now().strftime('%Y%m%d%H%M%S') + str(user.id)
+        price = decimal.Decimal(amount)
         OrderInfo.objects.create(
             order_no=order_no,
             pay_item_id=pay_item_id,
             user=user,
             payee=payee,
             pay_method=pay_method,
-            amount=amount,
+            amount=price,
             pay_item_class=pay_item_class,
             trade_status='WAIT_BUYER_PAY'
         )
 
-        #调用支付宝接口
+        # 调用支付宝接口
         # App支付，将order_string返回给app即可
         order_string = alipay.api_alipay_trade_app_pay(
-            out_trade_no=order_no,   #订单id
-            total_amount=str(amount),
+            out_trade_no=order_no,   # 订单id
+            total_amount=amount,
             subject='艺起评%s' % order_no,
         )
 
@@ -120,7 +121,7 @@ class OrderPayView(generics.GenericAPIView):
         # 沙箱
         # pay_url = 'https://openapi.alipaydev.com/gateway.do?' + order_string
 
-        return JsonResponse({'res': 3, 'order_string': order_string, 'out_trade_no': order_no})
+        return JsonResponse({'res': 3, 'order_string': order_string})
 
 
 # 付款之后紧接调用此函数，查询订单是否完成，给老师钱包增加金额，返回可以读取评论字段
