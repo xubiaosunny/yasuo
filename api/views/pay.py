@@ -86,14 +86,13 @@ class OrderPayView(generics.GenericAPIView):
 
         user = request.user
         order_no = datetime.now().strftime('%Y%m%d%H%M%S') + str(user.id)
-        price = decimal.Decimal(amount)
         OrderInfo.objects.create(
             order_no=order_no,
             pay_item_id=pay_item_id,
             user=user,
             payee=payee,
             pay_method=pay_method,
-            amount=price,
+            amount=amount,
             pay_item_class=pay_item_class,
             trade_status='WAIT_BUYER_PAY'
         )
@@ -102,7 +101,7 @@ class OrderPayView(generics.GenericAPIView):
         # App支付，将order_string返回给app即可
         order_string = alipay.api_alipay_trade_app_pay(
             out_trade_no=order_no,   # 订单id
-            total_amount=amount,
+            total_amount=str(amount),
             subject='艺起评%s' % order_no,
         )
 
