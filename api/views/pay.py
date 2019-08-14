@@ -83,7 +83,6 @@ class OrderPayView(generics.GenericAPIView):
             debug=False    # 不是调试模式，访问实际环境地址
             # debug=True  # 沙箱开发环境
         )
-
         user = request.user
         order_no = datetime.now().strftime('%Y%m%d%H%M%S') + str(user.id)
         OrderInfo.objects.create(
