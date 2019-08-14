@@ -103,7 +103,6 @@ class OrderPayView(generics.GenericAPIView):
             out_trade_no=order_no,   #订单id
             total_amount=str(amount),
             subject='艺起评%s' % order_no,
-            notify_url=None  # 可选, 不填则使用默认notify url
         )
 
         # # 手机网站支付，需要跳转到https://openapi.alipay.com/gateway.do? + order_string
