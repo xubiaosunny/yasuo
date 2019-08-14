@@ -120,7 +120,7 @@ class OrderPayView(generics.GenericAPIView):
 
         # 沙箱
         # pay_url = 'https://openapi.alipaydev.com/gateway.do?' + order_string
-        order_string = json.dumps(order_string)
+        order_string = json.dumps({"order_string": order_string})
         return HttpResponse(order_string)
 
 
