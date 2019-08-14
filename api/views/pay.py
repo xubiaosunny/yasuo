@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+from kombu.utils import json
+
 from db.models import CustomUser
 from django.conf import settings
 from rest_framework import generics
@@ -119,7 +121,7 @@ class OrderPayView(generics.GenericAPIView):
         # 沙箱
         # pay_url = 'https://openapi.alipaydev.com/gateway.do?' + order_string
 
-        return JsonResponse({'res': 3, 'order_string': order_string})
+        return json.dumps(order_string, ensure_ascii=False)
 
 
 # 付款之后紧接调用此函数，查询订单是否完成，给老师钱包增加金额，返回可以读取评论字段
