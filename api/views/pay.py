@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from kombu.utils import json
 
-from db.models import CustomUser
+from db.models import CustomUser, WorksComment, WorksQuestion
 from django.conf import settings
 from rest_framework import generics
 from db.db_models.pay import *
@@ -32,6 +32,14 @@ class AliPayNotifyView(generics.GenericAPIView):
             order = OrderInfo.objects.get(order_no=order_no)
         except:
             return Response('filed')
+        if order.pay_item_class == 'WorksComment':
+            works_comment = WorksComment.objects.get(id=order.pay_item_id)
+            works_comment.is_pay = True
+            works_comment.save()
+        if order.pay_item_class == 'WorksQuestion':
+            works_cquestion = WorksComment.objects.get(id=order.pay_item_id)
+            works_cquestion.is_pay = True
+            works_cquestion.save()
         order.trade_no = trade_no
         order.trade_status = trade_status
         order.save()
