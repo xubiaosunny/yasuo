@@ -1,6 +1,8 @@
 from django.shortcuts import render
-from django.http import JsonResponse
-from db.models import CustomUser
+from django.http import JsonResponse, HttpResponse
+from kombu.utils import json
+
+from db.models import CustomUser, WorksComment, WorksQuestion
 from django.conf import settings
 from rest_framework import generics
 from db.db_models.pay import *
@@ -30,13 +32,21 @@ class AliPayNotifyView(generics.GenericAPIView):
             order = OrderInfo.objects.get(order_no=order_no)
         except:
             return Response('filed')
+        if order.pay_item_class == 'WorksComment':
+            works_comment = WorksComment.objects.get(id=order.pay_item_id)
+            works_comment.is_pay = True
+            works_comment.save()
+        if order.pay_item_class == 'WorksQuestion':
+            works_cquestion = WorksComment.objects.get(id=order.pay_item_id)
+            works_cquestion.is_pay = True
+            works_cquestion.save()
         order.trade_no = trade_no
         order.trade_status = trade_status
         order.save()
 
         user_items = CustomUser.objects.get(user=order.payee)
-        money = order.amount / 2
-        user_items.credit = user_items.credit + decimal.Decimal(money)
+        monery = order.amount / 2
+        user_items.credit = user_items.credit + decimal.Decimal(monery)
         user_items.save()
         return Response('success')
 
@@ -62,6 +72,12 @@ class OrderPayView(generics.GenericAPIView):
         pay_item_class = serializer.validated_data.get('pay_item_class')
         pay_item_id = serializer.validated_data.get('pay_item_id')
 
+        # try:
+        # 	order = OrderInfo.objects.get(order_id=order_id, user=user, pay_method=2, order_status=1)
+        # except OrderInfo.DoesNotExist:
+        # 	return JsonResponse({"res": 2, 'errmas': '订单错误'})
+
+
         # 业务处理：使用sdk调用支付宝的支付接口
         # 初始化
         app_private_key_string = open(os.path.join(settings.BASE_DIR, "app_private_key.pem")).read()
@@ -77,7 +93,6 @@ class OrderPayView(generics.GenericAPIView):
             debug=False    # 不是调试模式，访问实际环境地址
             # debug=True  # 沙箱开发环境
         )
-
         user = request.user
         order_no = datetime.now().strftime('%Y%m%d%H%M%S') + str(user.id)
         OrderInfo.objects.create(
@@ -94,10 +109,9 @@ class OrderPayView(generics.GenericAPIView):
         # 调用支付宝接口
         # App支付，将order_string返回给app即可
         order_string = alipay.api_alipay_trade_app_pay(
-            out_trade_no=order_no,   #订单id
+            out_trade_no=order_no,   # 订单id
             total_amount=str(amount),
             subject='艺起评%s' % order_no,
-            notify_url=None  # 可选, 不填则使用默认notify url
         )
 
         # # 手机网站支付，需要跳转到https://openapi.alipay.com/gateway.do? + order_string
@@ -114,8 +128,8 @@ class OrderPayView(generics.GenericAPIView):
 
         # 沙箱
         # pay_url = 'https://openapi.alipaydev.com/gateway.do?' + order_string
-
-        return JsonResponse({'res': 3, 'order_string': order_string})
+        order_string = json.dumps({"order_string": order_string})
+        return HttpResponse(order_string)
 
 
 # 付款之后紧接调用此函数，查询订单是否完成，给老师钱包增加金额，返回可以读取评论字段
@@ -129,6 +143,7 @@ class CheckPayView(generics.GenericAPIView):
 
     def post(self, request):
         """查询支付结果"""
+
         # 接受参数
         serializer = OrderCheckSerializer(data=request.data)
         if not serializer.is_valid():
@@ -200,7 +215,6 @@ class CheckPayView(generics.GenericAPIView):
 
                 # 增加被支付者钱包金额
                 # user_items = CustomUser.objects.get(user=payee)
-                # invoice_amount = invoice_amount / 2
                 # user_items.credit = user_items.credit + decimal.Decimal(invoice_amount)
                 # user_items.save()
 
@@ -276,7 +290,7 @@ class ExtractPayVIew(generics.GenericAPIView):
                 amount=3.12
             )
 
-            # 返回结果
+            #返回结果
             # result = {'code': '10000', 'msg': 'Success', 'order_id': '', 'out_biz_no': '', 'pay_date': '2017-06-26 14:36:25'}
             # code = result.get('code')
             # if code == 10000 or code == '10000':
