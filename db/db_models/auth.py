@@ -202,5 +202,6 @@ class Message(models.Model):
     push_time = models.DateTimeField(_('Push Time'), auto_now_add=True)
 
     def details(self):
-        data = model_to_dict(self, exclude=[])
+        data = model_to_dict(self, exclude=['push_time'])
+        data['push_time'] = self.push_time.strftime('%Y-%m-%d %H:%M:%S')
         return data
