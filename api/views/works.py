@@ -82,7 +82,11 @@ class WorksCommentView(generics.GenericAPIView):
     def get(self, request, _id):
         """获取_id对应作品的所有评论"""
         comments = WorksComment.objects.filter(works_id=_id)
-        return response_200({'comments': [comment.details() for comment in comments]})
+        last_question = WorksQuestion.objects.filter(works_id=_id, to=request.user).order_by('-create_time').first()
+        return response_200({
+            'to_me_last_question_id': last_question.id if last_question else None,
+            'comments': [comment.details() for comment in comments]
+        })
 
     @my_permission_classes((IsTeacher, ))
     def post(self, request, _id):
