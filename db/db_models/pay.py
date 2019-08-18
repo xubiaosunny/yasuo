@@ -26,7 +26,7 @@ class OrderInfo(models.Model):
     user = models.ForeignKey('CustomUser', verbose_name='付款方', on_delete=models.PROTECT)
     payee = models.ForeignKey('CustomUser', related_name='order_payee', verbose_name='收款方', on_delete=models.PROTECT)
     pay_method = models.SmallIntegerField(choices=PAY_METHOD_CHOICES, default=1, verbose_name="支付方式")
-    amount = models.DecimalField(max_digits=10, decimal_places=3, verbose_name='价格')
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='价格')
     trade_status = models.CharField(choices=ORDER_STATUS_CHOICES, default=1, verbose_name='支付状态', max_length=50)
     pay_item_class = models.CharField(max_length=50, choices=PAY_ITEM_CLASS_CHOICES, verbose_name="所支付类名")
     pay_item_id = models.IntegerField(verbose_name='所支付的id')
