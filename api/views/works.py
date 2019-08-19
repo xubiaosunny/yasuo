@@ -84,6 +84,7 @@ class WorksCommentView(generics.GenericAPIView):
         comments = WorksComment.objects.filter(works_id=_id)
         last_question = WorksQuestion.objects.filter(works_id=_id, to=request.user).order_by('-create_time').first()
         return response_200({
+            'is_commented': WorksComment.objects.filter(works_id=_id, user=request.user).exists(),
             'to_me_last_question_id': last_question.id if last_question else None,
             'comments': [comment.details() for comment in comments]
         })
