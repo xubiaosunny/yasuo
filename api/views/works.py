@@ -64,8 +64,8 @@ class WorksFavoriteView(generics.GenericAPIView):
         """点赞"""
         works = get_object_or_404(Works, pk=_id)
         works.favorite.add(request.user)
-        send_push_j(works.user_id, '%s点赞了你的作品' % (request.user.full_name or request.user.phone,),
-                    class_name=Message.CLASS_NAME_CHOICES[0][0], class_id=works.id)
+        # send_push_j(works.user_id, '%s点赞了你的作品' % (request.user.full_name or request.user.phone,),
+        #             class_name=Message.CLASS_NAME_CHOICES[0][0], class_id=works.id)
         return response_200(works.details(user=request.user))
 
     def delete(self, request, _id):
