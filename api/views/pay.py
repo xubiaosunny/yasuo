@@ -52,9 +52,14 @@ class AliPayNotifyView(generics.GenericAPIView):
         order.trade_status = trade_status
         order.save()
 
-        user_items = CustomUser.objects.get(user=order.payee)
+        # user_items = CustomUser.objects.get(id=order.payee)
+        user_items = order.payee
+        print(666666666666666)
+        print(user_items)
+        print(777777777777777)
         monery = order.amount / 2
-        user_items.credit = user_items.credit + decimal.Decimal(monery)
+        user_items.credit += decimal.Decimal(monery)
+        print(user_items.credit)
         user_items.save()
         return Response('success')
 
