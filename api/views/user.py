@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 
 from api.serializer.user import UserInfoSerializer, UserFollowSerializer
 from utils.common.response import *
-from db.models import CustomUser, Works, Message
+from db.models import CustomUser, Works, Message, WorksComment, WorksQuestion, WorksQuestionReply
 from db.const import CITY
 from utils.tasks.push import *
 from rest_framework import serializers
@@ -231,3 +231,39 @@ class UserMessageReadView(generics.GenericAPIView):
     def put(self, request, _id):
         Message.objects.filter(pk=_id).update(is_read=True)
         return response_200({})
+
+
+class UserMessageChartDetailView(generics.GenericAPIView):
+    """
+    标记消息已读
+    """
+    serializer_class = serializers.Serializer
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, _id):
+        import db.models
+        message = get_object_or_404(Message, pk=_id, user=request.user)
+        _class = getattr(db.models, message.class_name, )
+        if not _class:
+            return response_404()
+        class_instance = _class.objects.get(pk=message.class_id)
+        if isinstance(class_instance, CustomUser):
+            return response_200({'user': class_instance.to_dict()})
+
+        works = class_instance if isinstance(class_instance, Works) else class_instance.works
+        if request.user.role == CustomUser.ROLE_CHOICES[0][0]:
+            teacher = request.user
+        else:
+            teacher = class_instance.user if isinstance(class_instance, WorksComment) else class_instance.to
+        comments = WorksComment.objects.filter(works=works, user=teacher)
+        chat_list = []
+        if comments.count() > 0:
+            chat_list.append(comments[0])
+        for q in WorksQuestion.objects.filter(works=works, to=teacher):
+            chat_list.append(q)
+            chat_list.extend(list(WorksQuestionReply.objects.filter(works_question=q)))
+
+        return response_200({
+            'works': works.details(),
+            'chat_list': [{**i.details(), 'class': i.__class__.__name__}
+                          for i in sorted(chat_list, key=lambda x: x.create_time)]})
