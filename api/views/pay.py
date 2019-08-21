@@ -172,7 +172,7 @@ class CheckPayView(generics.GenericAPIView):
 
         user = request.user
         try:
-            order = OrderInfo.objects.get(order_no=order_no, user=user, pay_method=2, trade_status='TRADE_SUCCESS')
+            order = OrderInfo.objects.get(order_no=order_no, user=user, pay_method=2)
         except OrderInfo.DoesNotExist:
             return JsonResponse({"res": 2, 'errmas': '订单错误'})
 
