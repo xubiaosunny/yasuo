@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from kombu.utils import json
 
-from db.models import CustomUser, WorksComment, WorksQuestion
+from db.models import CustomUser, WorksComment, WorksQuestion, Message
 from django.conf import settings
 from rest_framework import generics
 from db.db_models.pay import *
@@ -16,6 +16,7 @@ import os
 import time
 import decimal
 from rest_framework import serializers
+from utils.tasks.push import send_push_j
 
 
 class AliPayNotifyView(generics.GenericAPIView):
@@ -23,19 +24,9 @@ class AliPayNotifyView(generics.GenericAPIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
-        print(11111111111)
-        print(time.time())
-        print(222222222222222)
-        print(request.POST)
-        print(3333333333333333333333)
         order_no = request.POST.get('out_trade_no')
         trade_no = request.POST.get('trade_no')
         trade_status = request.POST.get('trade_status')
-        print(order_no)
-        print(44444444444)
-        print(trade_no)
-        print(5555555555555555)
-        print(trade_status)
         try:
             order = OrderInfo.objects.get(order_no=order_no)
         except:
@@ -44,25 +35,24 @@ class AliPayNotifyView(generics.GenericAPIView):
             works_comment = WorksComment.objects.get(id=order.pay_item_id)
             works_comment.is_pay = True
             works_comment.save()
+            user = works_comment.works.user
+            send_push_j(works_comment.user_id, '%s收听了您的评论' % (user.full_name or user.phone,),
+                        class_name=Message.CLASS_NAME_CHOICES[1][0], class_id=None)
         if order.pay_item_class == 'WorksQuestion':
             works_cquestion = WorksQuestion.objects.get(id=order.pay_item_id)
             works_cquestion.is_pay = True
             works_cquestion.save()
+            user = works_cquestion.works.user
+            send_push_j(works_cquestion.to_id, '%s收听了您的回复' % (user.full_name or user.phone,),
+                        class_name=Message.CLASS_NAME_CHOICES[3][0], class_id=works_cquestion.id)
         order.trade_no = trade_no
         order.trade_status = trade_status
         order.save()
-        print(order)
         # user_items = CustomUser.objects.get(id=order.payee)
         user_items = order.payee
-        print(666666666666666)
-        print(user_items)
-        print(777777777777777)
         monery = order.amount / 2
         user_items.credit += decimal.Decimal(monery)
-        print(user_items.credit)
         user_items.save()
-        print(888888888888888)
-        print(user_items)
         return Response('success')
 
 

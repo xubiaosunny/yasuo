@@ -193,6 +193,7 @@ class Message(models.Model):
         ('Works', 'Works'),
         ('WorksQuestion', 'WorksQuestion'),
         ('CustomUser', 'CustomUser'),
+        ('WorksComment', 'WorksComment'),
     )
     user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
     message = models.CharField(_('Message'), max_length=255)
