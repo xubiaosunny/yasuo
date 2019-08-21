@@ -220,7 +220,7 @@ class CheckPayView(generics.GenericAPIView):
                     works_comment.is_pay = True
                     works_comment.save()
                 if order.pay_item_class == 'WorksQuestion':
-                    works_cquestion = WorksComment.objects.get(id=order.pay_item_id)
+                    works_cquestion = WorksQuestion.objects.get(id=order.pay_item_id)
                     works_cquestion.is_pay = True
                     works_cquestion.save()
 
