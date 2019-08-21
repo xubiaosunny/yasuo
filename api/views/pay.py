@@ -23,11 +23,19 @@ class AliPayNotifyView(generics.GenericAPIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
+        print(11111111111)
         print(time.time())
+        print(222222222222222)
         print(request.POST)
+        print(3333333333333333333333)
         order_no = request.POST.get('out_trade_no')
         trade_no = request.POST.get('trade_no')
         trade_status = request.POST.get('trade_status')
+        print(order_no)
+        print(44444444444)
+        print(trade_no)
+        print(5555555555555555)
+        print(trade_status)
         try:
             order = OrderInfo.objects.get(order_no=order_no)
         except:
@@ -84,8 +92,8 @@ class OrderPayView(generics.GenericAPIView):
         alipay_public_key_string = open(os.path.join(settings.BASE_DIR, "alipay_public_key.pem")).read()
         alipay = AliPay(
             appid="2019080766140322",
-            # app_notify_url=SITE_DOMAIN + '/api/order/alipay_notifiy/',
-            app_notify_url=None,
+            app_notify_url=SITE_DOMAIN + '/api/order/alipay_notifiy/',
+            # app_notify_url=None,
             # app_private_key_path=os.path.join(settings.BASE_DIR, 'apps/blog/app_private_key.pem'),
             app_private_key_string=app_private_key_string,
             # alipay_public_key_path=os.path.join(settings.BASE_DIR, 'apps/blog/alipay_public_key.pem'),
