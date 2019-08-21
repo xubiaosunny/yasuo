@@ -61,6 +61,8 @@ class AliPayNotifyView(generics.GenericAPIView):
         user_items.credit += decimal.Decimal(monery)
         print(user_items.credit)
         user_items.save()
+        print(888888888888888)
+        print(user_items)
         return Response('success')
 
 
