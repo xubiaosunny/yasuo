@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from kombu.utils import json
 
-from db.models import CustomUser, WorksComment, WorksQuestion
+from db.models import CustomUser, WorksComment, WorksQuestion, Message
 from django.conf import settings
 from rest_framework import generics
 from db.db_models.pay import *
@@ -16,6 +16,7 @@ import os
 import time
 import decimal
 from rest_framework import serializers
+from utils.tasks.push import send_push_j
 
 
 class AliPayNotifyView(generics.GenericAPIView):
@@ -23,8 +24,6 @@ class AliPayNotifyView(generics.GenericAPIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
-        print(time.time())
-        print(request.POST)
         order_no = request.POST.get('out_trade_no')
         trade_no = request.POST.get('trade_no')
         trade_status = request.POST.get('trade_status')
@@ -36,17 +35,23 @@ class AliPayNotifyView(generics.GenericAPIView):
             works_comment = WorksComment.objects.get(id=order.pay_item_id)
             works_comment.is_pay = True
             works_comment.save()
+            user = works_comment.works.user
+            send_push_j(works_comment.user_id, '%s收听了您的评论' % (user.full_name or user.phone,),
+                        class_name=Message.CLASS_NAME_CHOICES[1][0], class_id=None)
         if order.pay_item_class == 'WorksQuestion':
-            works_cquestion = WorksComment.objects.get(id=order.pay_item_id)
+            works_cquestion = WorksQuestion.objects.get(id=order.pay_item_id)
             works_cquestion.is_pay = True
             works_cquestion.save()
+            user = works_cquestion.works.user
+            send_push_j(works_cquestion.to_id, '%s收听了您的回复' % (user.full_name or user.phone,),
+                        class_name=Message.CLASS_NAME_CHOICES[3][0], class_id=works_cquestion.id)
         order.trade_no = trade_no
         order.trade_status = trade_status
         order.save()
-
-        user_items = CustomUser.objects.get(user=order.payee)
+        # user_items = CustomUser.objects.get(id=order.payee)
+        user_items = order.payee
         monery = order.amount / 2
-        user_items.credit = user_items.credit + decimal.Decimal(monery)
+        user_items.credit += decimal.Decimal(monery)
         user_items.save()
         return Response('success')
 
@@ -85,6 +90,7 @@ class OrderPayView(generics.GenericAPIView):
         alipay = AliPay(
             appid="2019080766140322",
             app_notify_url=SITE_DOMAIN + '/api/order/alipay_notifiy/',
+            # app_notify_url=None,
             # app_private_key_path=os.path.join(settings.BASE_DIR, 'apps/blog/app_private_key.pem'),
             app_private_key_string=app_private_key_string,
             # alipay_public_key_path=os.path.join(settings.BASE_DIR, 'apps/blog/alipay_public_key.pem'),
@@ -128,7 +134,7 @@ class OrderPayView(generics.GenericAPIView):
 
         # 沙箱
         # pay_url = 'https://openapi.alipaydev.com/gateway.do?' + order_string
-        order_string = json.dumps({"order_string": order_string})
+        order_string = json.dumps({"order_string": order_string, "order_no": order_no})
         return HttpResponse(order_string)
 
 
@@ -150,7 +156,7 @@ class CheckPayView(generics.GenericAPIView):
             return response_400(serializer.errors)
 
         order_no = serializer.validated_data.get('order_no')
-        payee = serializer.validated_data.get('payee')
+        # payee = serializer.validated_data.get('payee')
 
         # 业务处理：使用sdk调用支付宝的支付接口
         # 初始化
@@ -158,7 +164,8 @@ class CheckPayView(generics.GenericAPIView):
         alipay_public_key_string = open(os.path.join(settings.BASE_DIR, "alipay_public_key.pem")).read()
         alipay = AliPay(
             appid="2019080766140322",
-            app_notify_url=SITE_DOMAIN + '/api/order/alipay_notifiy/',
+            # app_notify_url=SITE_DOMAIN + '/api/order/alipay_notifiy/',
+            app_notify_url=None,
             # app_private_key_path=os.path.join(settings.BASE_DIR, 'apps/blog/app_private_key.pem'),
             app_private_key_string=app_private_key_string,
             # alipay_public_key_path=os.path.join(settings.BASE_DIR, 'apps/blog/alipay_public_key.pem'),
@@ -170,7 +177,7 @@ class CheckPayView(generics.GenericAPIView):
 
         user = request.user
         try:
-            order = OrderInfo.objects.get(order_no=order_no, user=user, pay_method=2, trade_status='TRADE_SUCCESS')
+            order = OrderInfo.objects.get(order_no=order_no, user=user, pay_method=2)
         except OrderInfo.DoesNotExist:
             return JsonResponse({"res": 2, 'errmas': '订单错误'})
 
@@ -207,16 +214,26 @@ class CheckPayView(generics.GenericAPIView):
                 # 支付成功
                 # 获取支付宝交易号
                 # 更新支付订单信息
-                # trade_no = response.get('trade_no')
-                # invoice_amount = request.get('invoice_amount')
-                # order.trade_no = trade_no
-                # order.order_status = 2
-                # order.save()
+                # amount = request.get('invoice_amount')
+                order.trade_no = request.get('trade_no')
+                order.order_status = 'TRADE_SUCCESS'
+                order.save()
+
+                # 修改支付的状态，确定可以听评论
+                if order.pay_item_class == 'WorksComment':
+                    works_comment = WorksComment.objects.get(id=order.pay_item_id)
+                    works_comment.is_pay = True
+                    works_comment.save()
+                if order.pay_item_class == 'WorksQuestion':
+                    works_cquestion = WorksQuestion.objects.get(id=order.pay_item_id)
+                    works_cquestion.is_pay = True
+                    works_cquestion.save()
 
                 # 增加被支付者钱包金额
-                # user_items = CustomUser.objects.get(user=payee)
-                # user_items.credit = user_items.credit + decimal.Decimal(invoice_amount)
-                # user_items.save()
+                user_items = CustomUser.objects.get(user=order.payee)
+                monery = order.amount / 2
+                user_items.credit += decimal.Decimal(monery)
+                user_items.save()
 
                 # 返回结果
                 return JsonResponse({'res': 3, 'message': '支付成功'})
