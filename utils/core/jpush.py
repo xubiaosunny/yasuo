@@ -8,10 +8,10 @@ push = _jpush.create_push()
 # _jpush.set_logging("DEBUG")
 
 
-def push_message(tags, message):
-    push.audience = jpush.audience({"tag": tags})
+def push_message(tags, message, platform=jpush.all_):
+    push.audience = jpush.all_ if tags == jpush.all_ else jpush.audience({"tag": tags})
     push.notification = jpush.notification(alert=message)
-    push.platform = jpush.all_
+    push.platform = platform
     try:
         response = push.send()
     except jpush.common.Unauthorized as e:

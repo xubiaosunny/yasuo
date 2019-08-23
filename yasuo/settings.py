@@ -154,6 +154,12 @@ CELERY_RESULT_BACKEND = config.CELERY['result_backend']
 CELERY_TIMEZONE = 'Asia/Shanghai'
 CELERY_ENABLE_UTC = True
 CELERY_IMPORTS = ['utils.tasks']
+CELERY_BEAT_SCHEDULE = {
+    'task-teacher-station': {
+        'task': 'utils.tasks.push.teacher_station',
+        'schedule': 600,
+    }
+}
 
 # log
 LOG_DIR = os.path.join(BASE_DIR, 'log')
