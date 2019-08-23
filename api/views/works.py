@@ -101,7 +101,7 @@ class WorksCommentView(generics.GenericAPIView):
         except ObjectDoesNotExist:
             comment = WorksComment.objects.create(user=request.user, works=works, **serializer.validated_data)
             send_push_j(works.user_id, '%s评论了你的作品' % (request.user.full_name or request.user.phone,),
-                        class_name=Message.CLASS_NAME_CHOICES[0][0], class_id=works.id)
+                        class_name=Message.CLASS_NAME_CHOICES[3][0], class_id=comment.id)
             return response_200(comment.details())
         except Exception as e:
             raise e

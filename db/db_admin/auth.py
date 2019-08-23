@@ -119,3 +119,7 @@ class CertificationAdmin(admin.ModelAdmin):
 
 class SMSCodeAdmin(admin.ModelAdmin):
     list_display = ('id', 'phone', 'code', 'send_time')
+
+
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'message', 'class_name', 'class_id', 'is_read')

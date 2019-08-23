@@ -3,8 +3,8 @@ from django.contrib.auth.models import Group
 from django.utils.translation import gettext_lazy as _
 
 from .models import CustomUser, SMSCode, LocalStorage, Works, WorksComment, WorksQuestion, WorksQuestionReply, \
-    Certification
-from .db_admin.auth import UserAdmin, SMSCodeAdmin, CertificationAdmin
+    Certification, Message
+from .db_admin.auth import UserAdmin, SMSCodeAdmin, CertificationAdmin, MessageAdmin
 from .db_admin.storage import LocalStorageAdmin
 from .db_admin.works import WorksAdmin, WorksCommentAdmin, WorksQuestionAdmin, WorksQuestionReplyAdmin
 
@@ -19,6 +19,7 @@ admin.site.site_header = _("YiQiPing Management System")
 admin.site.register(CustomUser, UserAdmin)
 admin.site.register(Certification, CertificationAdmin)
 admin.site.register(SMSCode, SMSCodeAdmin)
+admin.site.register(Message, MessageAdmin)
 
 admin.site.register(LocalStorage, LocalStorageAdmin)
 
