@@ -19,6 +19,8 @@ urlpatterns = [
     path('user/follow/works', user.UserFollowWorksView.as_view()),
     path('user/message/', user.UserMessageView.as_view()),
     path('user/message/<int:_id>/mark_read/', user.UserMessageReadView.as_view()),
+    path('user/question/', user.UserQuestionView.as_view()),
+    path('user/question/<int:_id>/details/', user.UserQuestionDetailsView.as_view()),
 
     path('storage/local_storage/', storage.LocalStorageView.as_view()),
 

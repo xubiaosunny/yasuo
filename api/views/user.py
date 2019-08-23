@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 
 from api.serializer.user import UserInfoSerializer, UserFollowSerializer
 from utils.common.response import *
-from db.models import CustomUser, Works, Message
+from db.models import CustomUser, Works, Message, WorksQuestion, WorksQuestionReply
 from db.const import CITY
 from utils.tasks.push import *
 from rest_framework import serializers
@@ -231,3 +231,28 @@ class UserMessageReadView(generics.GenericAPIView):
     def put(self, request, _id):
         Message.objects.filter(pk=_id).update(is_read=True)
         return response_200({})
+
+
+class UserQuestionView(generics.ListAPIView):
+    """
+    用户的提问
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        questions = WorksQuestion.objects.filter(works__user=request.user)
+        return response_200({'questions': [{**q.details(), 'works': q.works.details()} for q in questions]})
+
+
+class UserQuestionDetailsView(generics.ListAPIView):
+    """
+    用户的提问
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, _id):
+        question = get_object_or_404(WorksQuestion, pk=_id, works__user=request.user)
+        data = question.details()
+        data['works'] = question.works.details()
+        data['reply_list'] = [r.details() for r in question.worksquestionreply_set.all()]
+        return response_200(data)
