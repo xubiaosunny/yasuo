@@ -261,18 +261,6 @@ class ExtractPayVIew(generics.GenericAPIView):
         # 初始化
         app_private_key_string = open("apps/blog/app_private_key.pem").read()
         alipay_public_key_string = open("apps/blog/alipay_public_key.pem").read()
-
-        app_private_key_string == """
-                        -----BEGIN RSA PRIVATE KEY-----
-                        base64 encoded content
-                        -----END RSA PRIVATE KEY-----
-                        """
-
-        alipay_public_key_string == """
-                        -----BEGIN PUBLIC KEY-----
-                        base64 encoded content
-                        -----END PUBLIC KEY-----
-                        """
         alipay = AliPay(
             appid="2019080766140322",
             app_notify_url=None,
@@ -287,10 +275,10 @@ class ExtractPayVIew(generics.GenericAPIView):
 
         # 接受参数
         payee_account = request.POST.get('payee_account')
-        amount = request.get('amount')
+        amount = request.POST.get('amount')
         # 增加钱包金额
         user = request.user
-        # user_items = User.objects.get(user=user)
+        user_items = CustomUser.objects.get(user=user)
 
         if not payee_account or amount:
             return JsonResponse({'res': 1, 'mes': "传入参数有缺失"})
@@ -304,14 +292,14 @@ class ExtractPayVIew(generics.GenericAPIView):
                 payee_type="ALIPAY_LOGONID",
                 # payee_account="csqnji8117@sandbox.com",
                 payee_account=payee_account,
-                amount=3.12
+                amount=amount
             )
 
             #返回结果
             # result = {'code': '10000', 'msg': 'Success', 'order_id': '', 'out_biz_no': '', 'pay_date': '2017-06-26 14:36:25'}
-            # code = result.get('code')
-            # if code == 10000 or code == '10000':
-            #     order_id = result.get('order_id')
-            #     out_biz_no = result.get('out_biz_no')
-            #     pay_date = result.get('pay_date')
-            #     return JsonResponse({'code': '10000', 'msg': 'Success', 'order_id': '', 'out_biz_no': '', 'pay_date': '2017-06-26 14:36:25'})
+            code = result.get('code')
+            if code == 10000 or code == '10000':
+                order_id = result.get('order_id')
+                out_biz_no = result.get('out_biz_no')
+                pay_date = result.get('pay_date')
+                return JsonResponse({'res': 3, 'mes': "转账成功"})
