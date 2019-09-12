@@ -310,7 +310,7 @@ class ExtractPayVIew(generics.GenericAPIView):
                 amount=amount
             )
 
-        return JsonResponse({'res': 'ok', 'result': result})
+        return JsonResponse({'res': 'ok', 'result': result, 'out_biz_no': out_biz_no})
 
             # #返回结果
             # # result = {'code': '10000', 'msg': 'Success', 'order_id': '', 'out_biz_no': '', 'pay_date': '2017-06-26 14:36:25'}
