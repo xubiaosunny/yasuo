@@ -234,16 +234,16 @@ class CheckPayView(generics.GenericAPIView):
                 user_items.credit += decimal.Decimal(monery)
                 user_items.save()
                 # 返回结果
-                break
                 return JsonResponse({'res': 3, 'message': '支付成功'})
+                break
             elif code == '10000' and response.get('trade_status') == 'WAIT_BUYER_PAY':
                 # 等待买家付款
                 time.sleep(10)
                 continue
             else:
                 # 支付出错
-                break
                 return JsonResponse({'res': 4, "message": '支付失败'})
+                break
 
 
 # ajas post
