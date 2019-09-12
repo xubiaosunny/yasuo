@@ -107,7 +107,7 @@ class OrderPayView(generics.GenericAPIView):
             user=user,
             payee=payee,
             pay_method=pay_method,
-            amount=amount,
+            amount=decimal.Decimal(amount),
             pay_item_class=pay_item_class,
             trade_status='WAIT_BUYER_PAY'
         )
@@ -228,14 +228,13 @@ class CheckPayView(generics.GenericAPIView):
                     works_cquestion = WorksQuestion.objects.get(id=order.pay_item_id)
                     works_cquestion.is_pay = True
                     works_cquestion.save()
-
                 # 增加被支付者钱包金额
                 user_items = CustomUser.objects.get(user=order.payee)
                 monery = order.amount / 2
                 user_items.credit += decimal.Decimal(monery)
                 user_items.save()
-
                 # 返回结果
+                break
                 return JsonResponse({'res': 3, 'message': '支付成功'})
             elif code == '10000' and response.get('trade_status') == 'WAIT_BUYER_PAY':
                 # 等待买家付款
@@ -243,6 +242,7 @@ class CheckPayView(generics.GenericAPIView):
                 continue
             else:
                 # 支付出错
+                break
                 return JsonResponse({'res': 4, "message": '支付失败'})
 
 
@@ -298,6 +298,7 @@ class ExtractPayVIew(generics.GenericAPIView):
                 payee_type=payee_type,
                 pay_method=pay_method,
                 payee=user,
+                amount=decimal.Decimal(amount)
             )
 
             # transfer money to alipay account
@@ -347,21 +348,30 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
             debug=False  # 不是调试模式，访问实际环境地址
         )
         # 查询转账结果
-        result = alipay.api_alipay_fund_trans_order_query(
-            out_biz_no=out_biz_no
-        )
-        print(result)
-        if result.get('code') == '10000' and result.get('msg') == 'Success':
-            """若回调不成功可以使用这个"""
-            # 支付成功
-            # 获取支付宝交易号
-            # 更新支付订单信息
-            notify = TransferInfo.objects.get(out_biz_no=out_biz_no)
-            notify.amount = result.get('order_fee')
-            notify.trade_no = result.get('order_id')
-            # 扣除用户账户相应余额
-            user_items = notify.payee
-            user_items.credit -= decimal.Decimal(result.get('order_fee'))
-            user_items.save()
-            return Response('success')
+        while True:
+            result = alipay.api_alipay_fund_trans_order_query(
+                out_biz_no=out_biz_no
+            )
+            print(result)
+            if result.get('code') == '10000' and result.get('status') == 'SUCCESS':
+                """若回调不成功可以使用这个"""
+                # 支付成功
+                # 获取支付宝交易号
+                # 更新支付订单信息
+                notify = TransferInfo.objects.get(out_biz_no=out_biz_no)
+                notify.amount = result.get('order_fee')
+                notify.trade_no = result.get('order_id')
+                # 扣除用户账户相应余额
+                user_items = notify.payee
+                user_items.credit -= notify.amount
+                user_items.save()
+                return Response('success')
+            elif result.get('status') == 'INIT' or result.get('status') == 'DEALING':
+                # 等待买家付款
+                time.sleep(10)
+                continue
+            else:
+                # 支付出错
+                return JsonResponse({'res': 4, "message": '支付失败'})
+
 
