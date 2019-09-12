@@ -6,7 +6,7 @@ from db.models import CustomUser, WorksComment, WorksQuestion, Message
 from django.conf import settings
 from rest_framework import generics
 from db.db_models.pay import *
-from api.serializer.pay import OrderInfoSerializer, OrderCheckSerializer
+from api.serializer.pay import OrderInfoSerializer, OrderCheckSerializer, TransferInfoSerializer, AliExtractPayNotifySerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from utils.common.response import *
 from alipay import AliPay
@@ -251,11 +251,19 @@ class CheckPayView(generics.GenericAPIView):
 # /order/check
 class ExtractPayVIew(generics.GenericAPIView):
     """提取账户余额到支付宝"""
+    serializer_class = TransferInfoSerializer
+    permission_classes = (IsAuthenticated,)
+
     def post(self, request):
-        # 用户是否登陆
-        user = request.user
-        if not user.is_authenticated():
-            return JsonResponse({'res': 0, 'errmag': '用户未登录'})
+        #接收参数
+        serializer = OrderInfoSerializer(data=request.data)
+        if not serializer.is_valid():
+            return response_400(serializer.errors)
+
+        pay_method = serializer.validated_data.get('pay_method')
+        amount = serializer.validated_data.get('amount')
+        payee_type = serializer.validated_data.get('payee_type')
+        payee_account = serializer.validated_data.get('payee_account')
 
         # 业务处理：使用sdk调用支付宝的支付接口
         # 初始化
@@ -273,33 +281,87 @@ class ExtractPayVIew(generics.GenericAPIView):
             # debug=True  # 沙箱开发环境
         )
 
-        # 接受参数
-        payee_account = request.POST.get('payee_account')
-        amount = request.POST.get('amount')
         # 增加钱包金额
         user = request.user
-        user_items = CustomUser.objects.get(user=user)
+        user_info = CustomUser.objects.get(user=user)
 
-        if not payee_account or amount:
+        if not pay_method or amount or payee_type or payee_account:
             return JsonResponse({'res': 1, 'mes': "传入参数有缺失"})
         # 如果取款金额大于钱包余额，报错
-        elif amount > user.credit:
+        elif amount > user_info.credit:
             return JsonResponse({'res': 2, 'mes': "传入金额大于钱包余额"})
         else:
+            out_biz_no = datetime.now().strftime("%Y%m%d%H%M%S")
+            TransferInfo.objects.create(
+                out_biz_no=out_biz_no,
+                payee_account=payee_account,
+                payee_type=payee_type,
+                pay_method=pay_method,
+                payee=user,
+            )
+
             # transfer money to alipay account
             result = alipay.api_alipay_fund_trans_toaccount_transfer(
-                datetime.now().strftime("%Y%m%d%H%M%S"),
-                payee_type="ALIPAY_LOGONID",
+                # datetime.now().strftime("%Y%m%d%H%M%S"),
+                out_biz_no=out_biz_no,
+                payee_type=payee_type,
                 # payee_account="csqnji8117@sandbox.com",
                 payee_account=payee_account,
                 amount=amount
             )
 
-            #返回结果
-            # result = {'code': '10000', 'msg': 'Success', 'order_id': '', 'out_biz_no': '', 'pay_date': '2017-06-26 14:36:25'}
-            code = result.get('code')
-            if code == 10000 or code == '10000':
-                order_id = result.get('order_id')
-                out_biz_no = result.get('out_biz_no')
-                pay_date = result.get('pay_date')
-                return JsonResponse({'res': 3, 'mes': "转账成功"})
+        return JsonResponse({'res': 'ok', 'result': result})
+
+            # #返回结果
+            # # result = {'code': '10000', 'msg': 'Success', 'order_id': '', 'out_biz_no': '', 'pay_date': '2017-06-26 14:36:25'}
+            # code = result.get('code')
+            # if code == 10000 or code == '10000':
+            #     order_id = result.get('order_id')
+            #     out_biz_no = result.get('out_biz_no')
+            #     pay_date = result.get('pay_date')
+            #     return JsonResponse({'res': 3, 'mes': "转账成功"})
+
+
+class AliExtractPayNotifyView(generics.GenericAPIView):
+    """查询转账记录"""
+    serializer_class = AliExtractPayNotifySerializer
+    permission_classes = (AllowAny,)
+    def post(self, request):
+        # 接收参数
+        serializer = OrderInfoSerializer(data=request.data)
+        if not serializer.is_valid():
+            return response_400(serializer.errors)
+        out_biz_no = serializer.validated_data.get('out_biz_no')
+
+        # 业务处理：使用sdk调用支付宝的支付接口
+        # 初始化
+        app_private_key_string = open(os.path.join(settings.BASE_DIR, "app_private_key.pem")).read()
+        alipay_public_key_string = open(os.path.join(settings.BASE_DIR, "alipay_public_key.pem")).read()
+        alipay = AliPay(
+            appid="2019080766140322",
+            # app_notify_url=SITE_DOMAIN + '/api/order/alipay_notifiy/',
+            app_notify_url=None,
+            app_private_key_string=app_private_key_string,
+            alipay_public_key_string=alipay_public_key_string,
+            sign_type="RSA2",
+            debug=False  # 不是调试模式，访问实际环境地址
+        )
+        # 查询转账结果
+        result = alipay.api_alipay_fund_trans_order_query(
+            out_biz_no=out_biz_no
+        )
+        print(result)
+        if result.get('code') == '10000' and result.get('msg') == 'Success':
+            """若回调不成功可以使用这个"""
+            # 支付成功
+            # 获取支付宝交易号
+            # 更新支付订单信息
+            notify = TransferInfo.objects.get(out_biz_no=out_biz_no)
+            notify.amount = result.get('order_fee')
+            notify.trade_no = result.get('order_id')
+            # 扣除用户账户相应余额
+            user_items = notify.payee
+            user_items.credit -= decimal.Decimal(result.get('order_fee'))
+            user_items.save()
+            return Response('success')
+
