@@ -49,6 +49,6 @@ class TransferInfo(models.Model):
     payee_type = models.CharField(choices=PAY_TYPE_CHOICES, default=1, verbose_name='收款方账户类型', max_length=50)
     pay_method = models.SmallIntegerField(choices=PAY_METHOD_CHOICES, default=1, verbose_name="支付方式")
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='转账金额')
-    payee = models.ForeignKey('CustomUser', related_name='order_payee', verbose_name='收款方', on_delete=models.PROTECT)
+    payee = models.ForeignKey('CustomUser', related_name='transfer_payee', verbose_name='收款方', on_delete=models.PROTECT)
     create_time = models.DateTimeField(_('Create Time'), auto_now_add=True, blank=True)
     uodate_time = models.DateTimeField(_('Update Time'), auto_now=True, blank=True)
