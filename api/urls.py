@@ -40,5 +40,6 @@ urlpatterns = [
     path('order/alipay_notifiy/', pay.AliPayNotifyView.as_view()),
     path('order/extract_amount/', pay.ExtractPayVIew.as_view()),
     path('order/extract_notify/', pay.AliExtractPayNotifyView.as_view()),
+    path('order/payment_record', pay.PayInfo.as_view()),
 
 ]

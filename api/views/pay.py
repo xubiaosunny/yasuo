@@ -42,7 +42,6 @@ class MyAliPay(AliPay):
         )
 
 
-
 class AliPayNotifyView(generics.GenericAPIView):
     serializer_class = serializers.Serializer
     permission_classes = (AllowAny,)
@@ -338,6 +337,7 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
     """查询转账记录"""
     serializer_class = AliExtractPayNotifySerializer
     permission_classes = (AllowAny,)
+
     def post(self, request):
         # 接收参数
         serializer = OrderInfoSerializer(data=request.data)
@@ -382,4 +382,38 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
             else:
                 # 支付出错
                 return JsonResponse({'res': 4, "message": '支付失败'})
+
+
+class PayInfo(generics.GenericAPIView):
+    """交易记录"""
+    serializer_class = serializers.Serializer
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        user = request.user
+        payment = OrderInfo.objects.filter(payee=user).all()
+        drawing = TransferInfo.objects.filter(payee=user).all()
+        info_lists = []
+        for i in payment:
+            info_dict = {}
+            payment_user = i.user
+            info_dict['full_name'] = payment_user.full_name
+            info_dict['city'] = payment_user.city
+            info_dict['time'] = i.create_time
+            info_dict['amount'] = i.amount / 2
+            if payment_user.work_place:
+                info_dict['work_place'] = payment_user.work_place
+            if payment_user.grade:
+                info_dict['work_place'] = payment_user.grade
+            info_lists.append(info_dict)
+        for i in drawing:
+            info_dict = {}
+            info_dict['full_name'] = i.payee.full_name
+            info_dict['time'] = i.create_time
+            info_dict['amount'] = i.amount
+            info_lists.append(info_dict)
+        sorted(info_lists, lambda x: x["time"])
+        return JsonResponse(info_lists)
+
+
 
