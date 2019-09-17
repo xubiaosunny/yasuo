@@ -279,8 +279,8 @@ class ExtractPayVIew(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        #接收参数
-        serializer = OrderInfoSerializer(data=request.data)
+        # 接收参数
+        serializer = TransferInfoSerializer(data=request.data)
         if not serializer.is_valid():
             return response_400(serializer.errors)
 
