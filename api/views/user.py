@@ -139,7 +139,7 @@ class UserFollowView(generics.GenericAPIView):
             return response_400(serializer.errors)
         request.user.follow.add(serializer.data['user_id'])
         send_push_j(serializer.data['user_id'], '%s关注了你' % (request.user.full_name or request.user.phone, ),
-                    class_name=Message.CLASS_NAME_CHOICES[2][0], class_id=serializer.data['user_id'])
+                    class_name=Message.CLASS_NAME_CHOICES[2][0], class_id=request.user.id)
         return response_200(request.user.to_dict())
 
     def delete(self, request):
