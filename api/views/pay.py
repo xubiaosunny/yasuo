@@ -293,18 +293,17 @@ class ExtractPayVIew(generics.GenericAPIView):
         # 初始化
         app_private_key_string = open(os.path.join(settings.BASE_DIR, "app_private_key.pem")).read()
         alipay_public_key_string = open(os.path.join(settings.BASE_DIR, "alipay_public_key.pem")).read()
-        alipay = MyAliPay(
+        alipay = AliPay(
             appid="2019080766140322",
             app_notify_url=None,
-            app_private_key_path=app_private_key_string,
-            alipay_public_key_path=alipay_public_key_string,
+            app_private_key_string=app_private_key_string,
+            alipay_public_key_string=alipay_public_key_string,
             sign_type="RSA2",
-            debug=False    # 不是调试模式，访问实际环境地址
+            debug=False  # 不是调试模式，访问实际环境地址
         )
-        # 增加钱包金额
         user = request.user
         user_info = CustomUser.objects.get(user=user)
-        if not pay_method or amount or payee_type or payee_account:
+        if not pay_method or amount or payee_type or payee_account or payee_real_name:
             return JsonResponse({'res': 1, 'mes': "传入参数有缺失"})
         # 如果取款金额大于钱包余额，报错
         elif amount > user_info.credit:
@@ -330,7 +329,10 @@ class ExtractPayVIew(generics.GenericAPIView):
                 amount=amount,
                 payee_real_name=payee_real_name
             )
-        return JsonResponse({'res': 'ok', 'result': result, 'out_biz_no': out_biz_no})
+            if result.get('code') == 10000:
+                return JsonResponse({'res': 'ok', 'result': result, 'out_biz_no': out_biz_no})
+            else:
+                return JsonResponse({"res": result.get("sub_msg")})
 
 
 class AliExtractPayNotifyView(generics.GenericAPIView):
