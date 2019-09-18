@@ -395,30 +395,36 @@ class PayInfo(generics.GenericAPIView):
         payment = OrderInfo.objects.filter(payee=user).all()
         drawing = TransferInfo.objects.filter(payee=user).all()
         info_lists = []
-        for i in payment:
-            info_dict = {}
-            payment_user = i.payee
-            if i.trade_status == 'TRADE_SUCCESS':
-                info_dict['balance'] = payment_user.credit
-                info_dict['full_name'] = payment_user.full_name
-                info_dict['city'] = payment_user.city
-                info_dict['time'] = i.create_time
-                info_dict['amount'] = i.amount / 2
-                if payment_user.work_place:
-                    info_dict['work_place'] = payment_user.work_place
-                if payment_user.grade:
-                    info_dict['work_place'] = payment_user.grade
-                info_lists.append(info_dict)
-        for i in drawing:
-            info_dict = {}
-            if i.status == 'SUCCESS':
-                info_dict['balance'] = i.payee.credit
-                info_dict['full_name'] = i.payee.full_name
-                info_dict['time'] = i.create_time
-                info_dict['amount'] = i.amount
-                info_lists.append(info_dict)
+        if payment:
+            for i in payment:
+                info_dict = {}
+                payment_user = i.payee
+                if i.trade_status == 'TRADE_SUCCESS':
+                    balance = payment_user.credit
+                    info_dict['full_name'] = payment_user.full_name
+                    info_dict['city'] = payment_user.city
+                    info_dict['time'] = i.create_time
+                    info_dict['amount'] = i.amount / 2
+                    if payment_user.work_place:
+                        info_dict['work_place'] = payment_user.work_place
+                    if payment_user.grade:
+                        info_dict['work_place'] = payment_user.grade
+                    info_lists.append(info_dict)
+        if drawing:
+            for i in drawing:
+                info_dict = {}
+                if i.status == 'SUCCESS':
+                    balance = i.payee.credit
+                    info_dict['full_name'] = i.payee.full_name
+                    info_dict['time'] = i.create_time
+                    info_dict['amount'] = i.amount
+                    info_lists.append(info_dict)
         info_lists = sorted(info_lists, key=lambda x: x["time"], reverse=True)
-        return JsonResponse(info_lists, safe=False)
+        data = {
+            "data": info_lists,
+            "balance": balance
+        }
+        return JsonResponse(data, safe=False)
 
 
 
