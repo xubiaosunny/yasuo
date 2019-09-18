@@ -386,39 +386,45 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
 
 
 class PayInfo(generics.GenericAPIView):
-    """交易记录"""
+    """收款记录"""
     serializer_class = serializers.Serializer
     permission_classes = (AllowAny,)
 
     def post(self, request):
         user = request.user
         payment = OrderInfo.objects.filter(payee=user).all()
-        drawing = TransferInfo.objects.filter(payee=user).all()
+        # drawing = TransferInfo.objects.filter(payee=user).all()
         info_lists = []
         if payment:
             for i in payment:
                 info_dict = {}
-                payment_user = i.payee
+                balance = i.payee.credit
+                payment_user = i.user
                 if i.trade_status == 'TRADE_SUCCESS':
-                    balance = payment_user.credit
-                    info_dict['full_name'] = payment_user.full_name
-                    info_dict['city'] = payment_user.city
-                    info_dict['time'] = i.create_time
-                    info_dict['amount'] = i.amount / 2
-                    if payment_user.work_place:
-                        info_dict['work_place'] = payment_user.work_place
-                    if payment_user.grade:
-                        info_dict['work_place'] = payment_user.grade
-                    info_lists.append(info_dict)
-        if drawing:
-            for i in drawing:
-                info_dict = {}
-                if i.status == 'SUCCESS':
-                    balance = i.payee.credit
-                    info_dict['full_name'] = i.payee.full_name
-                    info_dict['time'] = i.create_time
-                    info_dict['amount'] = i.amount
-                    info_lists.append(info_dict)
+                    # info_dict['avatar'] = payment_user.avatar
+                    # info_dict['full_name'] = payment_user.full_name
+                    # info_dict['city'] = payment_user.city
+                    # info_dict['time'] = i.create_time
+                    # info_dict['amount'] = i.amount / 2
+                    # if payment_user.work_place:
+                    #     info_dict['work_place'] = payment_user.work_place
+                    # if payment_user.grade:
+                    #     info_dict['work_place'] = payment_user.grade
+                    # info_lists.append(info_dict)
+                    info = payment_user.to_dict()
+                    print(info)
+                    info_dict.update({"user_info": info, "time": i.create_time, "amount": i.amount / 2})
+                    info_lists.append(info)
+
+        # if drawing:
+        #     for i in drawing:
+        #         info_dict = {}
+        #         if i.status == 'SUCCESS':
+        #             balance = i.payee.credit
+        #             info_dict['full_name'] = i.payee.full_name
+        #             info_dict['time'] = i.create_time
+        #             info_dict['amount'] = i.amount
+        #             info_lists.append(info_dict)
         info_lists = sorted(info_lists, key=lambda x: x["time"], reverse=True)
         data = {
             "data": info_lists,
@@ -427,4 +433,25 @@ class PayInfo(generics.GenericAPIView):
         return JsonResponse(data, safe=False)
 
 
+class ExtractPayInfo(generics.GenericAPIView):
+    """提现记录"""
+    serializer_class = AliExtractPayNotifySerializer
+    permission_classes = (AllowAny,)
 
+    def post(self, request):
+        user = request.user
+        drawing = TransferInfo.objects.filter(payee=user).all()
+        info_lists = []
+        if drawing:
+            for i in drawing:
+                info_dict = {}
+                if i.status == 'SUCCESS':
+                    info_dict['full_name'] = i.payee.full_name
+                    info_dict['time'] = i.create_time
+                    info_dict['amount'] = i.amount
+                    info_lists.append(info_dict)
+        info_lists = sorted(info_lists, key=lambda x: x["time"], reverse=True)
+        data = {
+            "data": info_lists,
+        }
+        return JsonResponse(data, safe=False)
