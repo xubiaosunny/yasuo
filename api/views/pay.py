@@ -42,6 +42,13 @@ class MyAliPay(AliPay):
         )
 
 
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            return float(o)
+        super(DecimalEncoder, self).default(o)
+
+
 class AliPayNotifyView(generics.GenericAPIView):
     serializer_class = serializers.Serializer
     permission_classes = (AllowAny,)
@@ -329,7 +336,7 @@ class ExtractPayVIew(generics.GenericAPIView):
                 payee_real_name=payee_real_name
             )
             if result.get('code') == 10000:
-                return JsonResponse({'res': 'ok', 'result': result, 'out_biz_no': out_biz_no})
+                return JsonResponse({'res': 'ok', 'result': result, 'out_biz_no': out_biz_no}, cls=DecimalEncoder)
             else:
                 return JsonResponse({"res": result.get("sub_msg")})
 
