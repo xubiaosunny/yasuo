@@ -302,11 +302,11 @@ class ExtractPayVIew(generics.GenericAPIView):
             debug=False  # 不是调试模式，访问实际环境地址
         )
         user = request.user
-        user_info = CustomUser.objects.get(user=user)
+        print(user)
         if not pay_method or amount or payee_type or payee_account or payee_real_name:
             return JsonResponse({'res': 1, 'mes': "传入参数有缺失"})
         # 如果取款金额大于钱包余额，报错
-        elif amount > user_info.credit:
+        elif amount > user.credit:
             return JsonResponse({'res': 2, 'mes': "传入金额大于钱包余额"})
         else:
             out_biz_no = datetime.now().strftime("%Y%m%d%H%M%S")
