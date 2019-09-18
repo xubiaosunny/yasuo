@@ -300,7 +300,7 @@ class ExtractPayVIew(generics.GenericAPIView):
         # 初始化
         app_private_key_string = open(os.path.join(settings.BASE_DIR, "app_private_key.pem")).read()
         alipay_public_key_string = open(os.path.join(settings.BASE_DIR, "alipay_public_key.pem")).read()
-        alipay = MyAliPay(
+        alipay = AliPay(
             appid="2019080766140322",
             app_notify_url=None,
             app_private_key_string=app_private_key_string,
@@ -323,7 +323,7 @@ class ExtractPayVIew(generics.GenericAPIView):
                 pay_method=pay_method,
                 payee=user,
                 amount=decimal.Decimal(amount),
-                payee_real_name=payee_real_name
+                # payee_real_name=payee_real_name
             )
             # transfer money to alipay account
             result = alipay.api_alipay_fund_trans_toaccount_transfer(
@@ -333,7 +333,7 @@ class ExtractPayVIew(generics.GenericAPIView):
                 # payee_account="csqnji8117@sandbox.com",
                 payee_account=payee_account,
                 amount=amount,
-                payee_real_name=payee_real_name
+                # payee_real_name=payee_real_name
             )
             if result.get('code') == 10000:
                 return JsonResponse({'res': 'ok', 'result': result, 'out_biz_no': out_biz_no}, cls=DecimalEncoder)
