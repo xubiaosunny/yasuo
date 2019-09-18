@@ -332,7 +332,7 @@ class ExtractPayVIew(generics.GenericAPIView):
                 payee_type=payee_type,
                 # payee_account="csqnji8117@sandbox.com",
                 payee_account=payee_account,
-                amount=amount,
+                amount=str(amount),
                 # payee_real_name=payee_real_name
             )
             if result.get('code') == 10000:
