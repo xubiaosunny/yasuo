@@ -46,7 +46,7 @@ class TransferInfo(models.Model):
     trade_no = models.CharField(max_length=64, verbose_name='支付宝交易号')
     out_biz_no = models.CharField(max_length=64, verbose_name='商户转账唯一订单号')
     payee_account = models.CharField(max_length=64, verbose_name='支付宝账户')
-    payee_real_name = models.CharField(max_length=100, default=None, verbose_name='收款方姓名')
+    payee_real_name = models.CharField(max_length=100, default=None, null=True, verbose_name='收款方姓名')
     payee_type = models.CharField(choices=PAY_TYPE_CHOICES, default=1, verbose_name='收款方账户类型', max_length=50)
     pay_method = models.SmallIntegerField(choices=PAY_METHOD_CHOICES, default=1, verbose_name="支付方式")
     status = models.CharField(default=None, verbose_name='支付状态', max_length=50)
