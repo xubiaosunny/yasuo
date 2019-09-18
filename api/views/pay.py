@@ -415,7 +415,7 @@ class PayInfo(generics.GenericAPIView):
                 info_dict['time'] = i.create_time
                 info_dict['amount'] = i.amount
                 info_lists.append(info_dict)
-        info_lists = sorted(info_lists, key=lambda x: x["time"], reverse=True)
+        info_lists = sorted(info_lists, key=lambda x: x["time"], reverse=False)
         return JsonResponse(info_lists)
 
 
