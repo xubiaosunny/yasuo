@@ -412,19 +412,9 @@ class PayInfo(generics.GenericAPIView):
                     #     info_dict['work_place'] = payment_user.grade
                     # info_lists.append(info_dict)
                     info = payment_user.to_dict()
-                    print(info)
                     info_dict.update({"user_info": info, "time": i.create_time, "amount": i.amount / 2})
-                    info_lists.append(info)
-
-        # if drawing:
-        #     for i in drawing:
-        #         info_dict = {}
-        #         if i.status == 'SUCCESS':
-        #             balance = i.payee.credit
-        #             info_dict['full_name'] = i.payee.full_name
-        #             info_dict['time'] = i.create_time
-        #             info_dict['amount'] = i.amount
-        #             info_lists.append(info_dict)
+                    info_lists.append(info_dict)
+        print(info_lists)
         info_lists = sorted(info_lists, key=lambda x: x["time"], reverse=True)
         data = {
             "data": info_lists,
