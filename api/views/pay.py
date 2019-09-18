@@ -291,8 +291,8 @@ class ExtractPayVIew(generics.GenericAPIView):
 
         # 业务处理：使用sdk调用支付宝的支付接口
         # 初始化
-        app_private_key_string = open("apps/blog/app_private_key.pem").read()
-        alipay_public_key_string = open("apps/blog/alipay_public_key.pem").read()
+        app_private_key_string = open(os.path.join(settings.BASE_DIR, "app_private_key.pem")).read()
+        alipay_public_key_string = open(os.path.join(settings.BASE_DIR, "alipay_public_key.pem")).read()
         alipay = MyAliPay(
             appid="2019080766140322",
             app_notify_url=None,
@@ -368,6 +368,7 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
                 # 获取支付宝交易号
                 # 更新支付订单信息
                 notify = TransferInfo.objects.get(out_biz_no=out_biz_no)
+                notify.status = result.get('status')
                 notify.amount = result.get('order_fee')
                 notify.trade_no = result.get('order_id')
                 # 扣除用户账户相应余额
@@ -397,22 +398,24 @@ class PayInfo(generics.GenericAPIView):
         for i in payment:
             info_dict = {}
             payment_user = i.user
-            info_dict['full_name'] = payment_user.full_name
-            info_dict['city'] = payment_user.city
-            info_dict['time'] = i.create_time
-            info_dict['amount'] = i.amount / 2
-            if payment_user.work_place:
-                info_dict['work_place'] = payment_user.work_place
-            if payment_user.grade:
-                info_dict['work_place'] = payment_user.grade
-            info_lists.append(info_dict)
+            if i.trade_status == 'TRADE_SUCCESS':
+                info_dict['full_name'] = payment_user.full_name
+                info_dict['city'] = payment_user.city
+                info_dict['time'] = i.create_time
+                info_dict['amount'] = i.amount / 2
+                if payment_user.work_place:
+                    info_dict['work_place'] = payment_user.work_place
+                if payment_user.grade:
+                    info_dict['work_place'] = payment_user.grade
+                info_lists.append(info_dict)
         for i in drawing:
             info_dict = {}
-            info_dict['full_name'] = i.payee.full_name
-            info_dict['time'] = i.create_time
-            info_dict['amount'] = i.amount
-            info_lists.append(info_dict)
-        sorted(info_lists, lambda x: x["time"])
+            if i.status == 'SUCCESS':
+                info_dict['full_name'] = i.payee.full_name
+                info_dict['time'] = i.create_time
+                info_dict['amount'] = i.amount
+                info_lists.append(info_dict)
+        info_lists = sorted(info_lists, key=lambda x: x["time"], reverse=True)
         return JsonResponse(info_lists)
 
 
