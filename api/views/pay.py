@@ -293,7 +293,7 @@ class ExtractPayVIew(generics.GenericAPIView):
         # 初始化
         app_private_key_string = open(os.path.join(settings.BASE_DIR, "app_private_key.pem")).read()
         alipay_public_key_string = open(os.path.join(settings.BASE_DIR, "alipay_public_key.pem")).read()
-        alipay = AliPay(
+        alipay = MyAliPay(
             appid="2019080766140322",
             app_notify_url=None,
             app_private_key_string=app_private_key_string,
