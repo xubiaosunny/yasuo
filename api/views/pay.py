@@ -306,7 +306,7 @@ class ExtractPayVIew(generics.GenericAPIView):
         #     return JsonResponse({'res': 1, 'mes': "传入参数有缺失"})
         # 如果取款金额大于钱包余额，报错
         if amount > user.credit:
-            return JsonResponse({'res': 2, 'mes': "传入金额大于钱包余额"})
+            return JsonResponse({'mes': "传入金额大于钱包余额"})
         else:
             out_biz_no = datetime.now().strftime("%Y%m%d%H%M%S")
             TransferInfo.objects.create(
