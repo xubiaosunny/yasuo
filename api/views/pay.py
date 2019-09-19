@@ -82,6 +82,7 @@ class AliPayNotifyView(generics.GenericAPIView):
         user_items = order.payee
         monery = order.amount / 2
         user_items.credit += decimal.Decimal(monery)
+        print(user_items.credit)
         user_items.save()
         return Response('success')
 
@@ -423,7 +424,6 @@ class PayInfo(generics.GenericAPIView):
                     info = payment_user.to_dict()
                     info_dict.update({"user_info": info, "time": i.create_time, "amount": i.amount / 2})
                     info_lists.append(info_dict)
-        print(info_lists)
         info_lists = sorted(info_lists, key=lambda x: x["time"], reverse=True)
         data = {
             "data": info_lists,
