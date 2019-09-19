@@ -405,12 +405,11 @@ class PayInfo(generics.GenericAPIView):
         user = request.user
         payment = OrderInfo.objects.filter(payee=user).all()
         # drawing = TransferInfo.objects.filter(payee=user).all()
+        balance = user.credit
         info_lists = []
-        balance = 0
         if payment:
             for i in payment:
                 info_dict = {}
-                balance = i.payee.credit
                 payment_user = i.user
                 if i.trade_status == 'TRADE_SUCCESS':
                     # info_dict['avatar'] = payment_user.avatar
