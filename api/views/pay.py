@@ -427,7 +427,7 @@ class PayInfo(generics.GenericAPIView):
         info_lists = sorted(info_lists, key=lambda x: x["time"], reverse=True)
         data = {
             "data": info_lists,
-            "balance": int(balance)
+            "balance": balance
         }
         return JsonResponse(data, safe=False)
 
