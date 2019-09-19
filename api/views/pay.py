@@ -18,6 +18,7 @@ import decimal
 from rest_framework import serializers
 from utils.tasks.push import send_push_j
 from alipay.compat import urlopen
+from alipay.exceptions import AliPayException, AliPayValidationError
 
 
 class MyAliPay(AliPay):
@@ -40,6 +41,43 @@ class MyAliPay(AliPay):
         return self._verify_and_return_sync_response(
             raw_string, "alipay_fund_trans_toaccount_transfer_response"
         )
+
+
+    def _verify_and_return_sync_response(self, raw_string, response_type):
+        """
+        return response if verification succeeded, raise exception if not
+
+        As to issue #69, json.loads(raw_string)[response_type] should not be returned directly,
+        use json.loads(plain_content) instead
+
+        failed response is like this
+        {
+          "alipay_trade_query_response": {
+            "sub_code": "isv.invalid-app-id",
+            "code": "40002",
+            "sub_msg": "无效的AppID参数",
+            "msg": "Invalid Arguments"
+          }
+        }
+        """
+
+        response = json.loads(raw_string)
+        # raise exceptions
+        if "sign" not in response.keys():
+            result = response[response_type]
+            raise AliPayException(
+                code=result.get("code", "0"),
+                message=raw_string
+            )
+
+        sign = response["sign"]
+
+        # locate string to be signed
+        plain_content = self._get_string_to_be_signed(raw_string, response_type)
+
+        # if not self._verify(plain_content, sign):
+        #     raise AliPayValidationError
+        return json.loads(plain_content)
 
 
 class DecimalEncoder(json.JSONEncoder):
@@ -300,7 +338,7 @@ class ExtractPayVIew(generics.GenericAPIView):
         # 初始化
         app_private_key_string = open(os.path.join(settings.BASE_DIR, "app_private_key.pem")).read()
         alipay_public_key_string = open(os.path.join(settings.BASE_DIR, "alipay_public_key.pem")).read()
-        alipay = AliPay(
+        alipay = MyAliPay(
             appid="2019080766140322",
             app_notify_url=None,
             app_private_key_string=app_private_key_string,
@@ -323,7 +361,7 @@ class ExtractPayVIew(generics.GenericAPIView):
                 pay_method=pay_method,
                 payee=user,
                 amount=decimal.Decimal(amount),
-                # payee_real_name=payee_real_name
+                payee_real_name=payee_real_name
             )
             # transfer money to alipay account
             result = alipay.api_alipay_fund_trans_toaccount_transfer(
@@ -333,7 +371,7 @@ class ExtractPayVIew(generics.GenericAPIView):
                 # payee_account="csqnji8117@sandbox.com",
                 payee_account=payee_account,
                 amount=str(amount),
-                # payee_real_name=payee_real_name
+                payee_real_name=payee_real_name
             )
             if result.get('code') == 10000:
                 return JsonResponse({'res': 'ok', 'result': result, 'out_biz_no': out_biz_no}, cls=DecimalEncoder)
@@ -403,8 +441,6 @@ class PayInfo(generics.GenericAPIView):
         payment = OrderInfo.objects.filter(payee=user).all()
         # drawing = TransferInfo.objects.filter(payee=user).all()
         balance = user.credit
-        print(user)
-        print("yue", balance)
         info_lists = []
         if payment:
             for i in payment:
