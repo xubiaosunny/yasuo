@@ -403,6 +403,7 @@ class PayInfo(generics.GenericAPIView):
         payment = OrderInfo.objects.filter(payee=user).all()
         # drawing = TransferInfo.objects.filter(payee=user).all()
         info_lists = []
+        balance = 0
         if payment:
             for i in payment:
                 info_dict = {}
@@ -426,7 +427,7 @@ class PayInfo(generics.GenericAPIView):
         info_lists = sorted(info_lists, key=lambda x: x["time"], reverse=True)
         data = {
             "data": info_lists,
-            "balance": balance
+            "balance": int(balance)
         }
         return JsonResponse(data, safe=False)
 
