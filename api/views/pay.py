@@ -37,14 +37,14 @@ class AliPayNotifyView(generics.GenericAPIView):
             works_comment.save()
             user = works_comment.works.user
             send_push_j(works_comment.user_id, '%s收听了您的评论' % (user.full_name or user.phone,),
-                        class_name=Message.CLASS_NAME_CHOICES[1][0], class_id=None)
+                        class_name=Message.CLASS_NAME_CHOICES[3][0], class_id=works_comment.id)
         if order.pay_item_class == 'WorksQuestion':
             works_cquestion = WorksQuestion.objects.get(id=order.pay_item_id)
             works_cquestion.is_pay = True
             works_cquestion.save()
             user = works_cquestion.works.user
             send_push_j(works_cquestion.to_id, '%s收听了您的回复' % (user.full_name or user.phone,),
-                        class_name=Message.CLASS_NAME_CHOICES[3][0], class_id=works_cquestion.id)
+                        class_name=Message.CLASS_NAME_CHOICES[1][0], class_id=works_cquestion.id)
         order.trade_no = trade_no
         order.trade_status = trade_status
         order.save()
