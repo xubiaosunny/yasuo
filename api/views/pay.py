@@ -17,6 +17,36 @@ import time
 import decimal
 from rest_framework import serializers
 from utils.tasks.push import send_push_j
+from alipay.compat import urlopen
+
+
+class MyAliPay(AliPay):
+    def api_alipay_fund_trans_toaccount_transfer(
+            self, out_biz_no, payee_type, payee_account, amount, payee_real_name, **kwargs):
+        assert payee_type in ("ALIPAY_USERID", "ALIPAY_LOGONID"), "unknown payee type"
+        biz_content = {
+            "out_biz_no": out_biz_no,
+            "payee_type": payee_type,
+            "payee_account": payee_account,
+            "amount": amount,
+            "payee_real_name": payee_real_name
+
+        }
+        biz_content.update(kwargs)
+        data = self.build_body("alipay.fund.trans.toaccount.transfer", biz_content)
+
+        url = self._gateway + "?" + self.sign_data(data)
+        raw_string = urlopen(url, timeout=15).read().decode("utf-8")
+        return self._verify_and_return_sync_response(
+            raw_string, "alipay_fund_trans_toaccount_transfer_response"
+        )
+
+
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            return float(o)
+        super(DecimalEncoder, self).default(o)
 
 
 class AliPayNotifyView(generics.GenericAPIView):
@@ -255,8 +285,8 @@ class ExtractPayVIew(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        #接收参数
-        serializer = OrderInfoSerializer(data=request.data)
+        # 接收参数
+        serializer = TransferInfoSerializer(data=request.data)
         if not serializer.is_valid():
             return response_400(serializer.errors)
 
@@ -264,32 +294,26 @@ class ExtractPayVIew(generics.GenericAPIView):
         amount = serializer.validated_data.get('amount')
         payee_type = serializer.validated_data.get('payee_type')
         payee_account = serializer.validated_data.get('payee_account')
+        payee_real_name = serializer.validated_data.get('payee_real_name')
 
         # 业务处理：使用sdk调用支付宝的支付接口
         # 初始化
-        app_private_key_string = open("apps/blog/app_private_key.pem").read()
-        alipay_public_key_string = open("apps/blog/alipay_public_key.pem").read()
+        app_private_key_string = open(os.path.join(settings.BASE_DIR, "app_private_key.pem")).read()
+        alipay_public_key_string = open(os.path.join(settings.BASE_DIR, "alipay_public_key.pem")).read()
         alipay = AliPay(
             appid="2019080766140322",
             app_notify_url=None,
-            # app_private_key_path=os.path.join(settings.BASE_DIR, 'apps/blog/app_private_key.pem'),
-            app_private_key_path=app_private_key_string,
-            # alipay_public_key_path=os.path.join(settings.BASE_DIR, 'apps/blog/alipay_public_key.pem'),
-            alipay_public_key_path=alipay_public_key_string,
+            app_private_key_string=app_private_key_string,
+            alipay_public_key_string=alipay_public_key_string,
             sign_type="RSA2",
-            debug=False    # 不是调试模式，访问实际环境地址
-            # debug=True  # 沙箱开发环境
+            debug=False  # 不是调试模式，访问实际环境地址
         )
-
-        # 增加钱包金额
         user = request.user
-        user_info = CustomUser.objects.get(user=user)
-
-        if not pay_method or amount or payee_type or payee_account:
-            return JsonResponse({'res': 1, 'mes': "传入参数有缺失"})
+        # if not pay_method or amount or payee_type or payee_account or payee_real_name:
+        #     return JsonResponse({'res': 1, 'mes': "传入参数有缺失"})
         # 如果取款金额大于钱包余额，报错
-        elif amount > user_info.credit:
-            return JsonResponse({'res': 2, 'mes': "传入金额大于钱包余额"})
+        if amount > user.credit:
+            return JsonResponse({'mes': "传入金额大于钱包余额"})
         else:
             out_biz_no = datetime.now().strftime("%Y%m%d%H%M%S")
             TransferInfo.objects.create(
@@ -298,9 +322,9 @@ class ExtractPayVIew(generics.GenericAPIView):
                 payee_type=payee_type,
                 pay_method=pay_method,
                 payee=user,
-                amount=decimal.Decimal(amount)
+                amount=decimal.Decimal(amount),
+                # payee_real_name=payee_real_name
             )
-
             # transfer money to alipay account
             result = alipay.api_alipay_fund_trans_toaccount_transfer(
                 # datetime.now().strftime("%Y%m%d%H%M%S"),
@@ -308,39 +332,32 @@ class ExtractPayVIew(generics.GenericAPIView):
                 payee_type=payee_type,
                 # payee_account="csqnji8117@sandbox.com",
                 payee_account=payee_account,
-                amount=amount
+                amount=str(amount),
+                # payee_real_name=payee_real_name
             )
-
-        return JsonResponse({'res': 'ok', 'result': result, 'out_biz_no': out_biz_no})
-
-            # #返回结果
-            # # result = {'code': '10000', 'msg': 'Success', 'order_id': '', 'out_biz_no': '', 'pay_date': '2017-06-26 14:36:25'}
-            # code = result.get('code')
-            # if code == 10000 or code == '10000':
-            #     order_id = result.get('order_id')
-            #     out_biz_no = result.get('out_biz_no')
-            #     pay_date = result.get('pay_date')
-            #     return JsonResponse({'res': 3, 'mes': "转账成功"})
+            if result.get('code') == 10000:
+                return JsonResponse({'res': 'ok', 'result': result, 'out_biz_no': out_biz_no}, cls=DecimalEncoder)
+            else:
+                return JsonResponse({"res": result.get("sub_msg")})
 
 
 class AliExtractPayNotifyView(generics.GenericAPIView):
     """查询转账记录"""
     serializer_class = AliExtractPayNotifySerializer
     permission_classes = (AllowAny,)
+
     def post(self, request):
         # 接收参数
         serializer = OrderInfoSerializer(data=request.data)
         if not serializer.is_valid():
             return response_400(serializer.errors)
         out_biz_no = serializer.validated_data.get('out_biz_no')
-
         # 业务处理：使用sdk调用支付宝的支付接口
         # 初始化
         app_private_key_string = open(os.path.join(settings.BASE_DIR, "app_private_key.pem")).read()
         alipay_public_key_string = open(os.path.join(settings.BASE_DIR, "alipay_public_key.pem")).read()
         alipay = AliPay(
             appid="2019080766140322",
-            # app_notify_url=SITE_DOMAIN + '/api/order/alipay_notifiy/',
             app_notify_url=None,
             app_private_key_string=app_private_key_string,
             alipay_public_key_string=alipay_public_key_string,
@@ -359,6 +376,7 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
                 # 获取支付宝交易号
                 # 更新支付订单信息
                 notify = TransferInfo.objects.get(out_biz_no=out_biz_no)
+                notify.status = result.get('status')
                 notify.amount = result.get('order_fee')
                 notify.trade_no = result.get('order_id')
                 # 扣除用户账户相应余额
@@ -375,3 +393,63 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
                 return JsonResponse({'res': 4, "message": '支付失败'})
 
 
+class PayInfo(generics.GenericAPIView):
+    """收款记录"""
+    serializer_class = serializers.Serializer
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        user = request.user
+        payment = OrderInfo.objects.filter(payee=user).all()
+        # drawing = TransferInfo.objects.filter(payee=user).all()
+        info_lists = []
+        if payment:
+            for i in payment:
+                info_dict = {}
+                balance = i.payee.credit
+                payment_user = i.user
+                if i.trade_status == 'TRADE_SUCCESS':
+                    # info_dict['avatar'] = payment_user.avatar
+                    # info_dict['full_name'] = payment_user.full_name
+                    # info_dict['city'] = payment_user.city
+                    # info_dict['time'] = i.create_time
+                    # info_dict['amount'] = i.amount / 2
+                    # if payment_user.work_place:
+                    #     info_dict['work_place'] = payment_user.work_place
+                    # if payment_user.grade:
+                    #     info_dict['work_place'] = payment_user.grade
+                    # info_lists.append(info_dict)
+                    info = payment_user.to_dict()
+                    info_dict.update({"user_info": info, "time": i.create_time, "amount": i.amount / 2})
+                    info_lists.append(info_dict)
+        print(info_lists)
+        info_lists = sorted(info_lists, key=lambda x: x["time"], reverse=True)
+        data = {
+            "data": info_lists,
+            "balance": balance
+        }
+        return JsonResponse(data, safe=False)
+
+
+class ExtractPayInfo(generics.GenericAPIView):
+    """提现记录"""
+    serializer_class = AliExtractPayNotifySerializer
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        user = request.user
+        drawing = TransferInfo.objects.filter(payee=user).all()
+        info_lists = []
+        if drawing:
+            for i in drawing:
+                info_dict = {}
+                if i.status == 'SUCCESS':
+                    info_dict['full_name'] = i.payee.full_name
+                    info_dict['time'] = i.create_time
+                    info_dict['amount'] = i.amount
+                    info_lists.append(info_dict)
+        info_lists = sorted(info_lists, key=lambda x: x["time"], reverse=True)
+        data = {
+            "data": info_lists,
+        }
+        return JsonResponse(data, safe=False)
