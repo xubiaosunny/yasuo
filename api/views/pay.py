@@ -374,10 +374,10 @@ class ExtractPayVIew(generics.GenericAPIView):
                 payee_real_name=payee_real_name
             )
             print(result)
-            if result.get('code') == 10000:
-                return JsonResponse({'res': 'ok', 'result': result, 'out_biz_no': out_biz_no}, cls=DecimalEncoder)
+            if result.get('code') == 10000 or "10000":
+                return JsonResponse({"code": result.get("code"), 'res': result.get("sub_msg"), 'result': result, 'out_biz_no': out_biz_no}, cls=DecimalEncoder)
             else:
-                return JsonResponse({"res": result.get("sub_msg")})
+                return JsonResponse({"code": result.get("code"), "res": result.get("sub_msg")})
 
 
 class AliExtractPayNotifyView(generics.GenericAPIView):
@@ -408,9 +408,9 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
             result = alipay.api_alipay_fund_trans_order_query(
                 out_biz_no=out_biz_no
             )
+            print("**"*30)
             print(result)
             if result.get('code') == '10000' and result.get('status') == 'SUCCESS':
-                """若回调不成功可以使用这个"""
                 # 支付成功
                 # 获取支付宝交易号
                 # 更新支付订单信息
