@@ -390,9 +390,15 @@ class ExtractPayVIew(generics.GenericAPIView):
                 amount=str(amount),
                 payee_real_name=payee_real_name
             )
-            print(result)
+
             if result.get('code') == "10000":
-                return JsonResponse({"code": result.get("code"), 'message': result.get("sub_msg"), 'result': result, 'out_biz_no': result.get("out_biz_no")})
+                data = {
+                    "code": result.get("code"),
+                    'message': result.get("sub_msg"),
+                    'result': result,
+                    'out_biz_no': result.get("out_biz_no"),
+                }
+                return JsonResponse(data)
             else:
                 return JsonResponse({"code": result.get("code"), "message": result.get("sub_msg")})
 
@@ -433,12 +439,13 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
                 # 更新支付订单信息
                 notify = TransferInfo.objects.get(out_biz_no=out_biz_no)
                 notify.status = result.get('status')
-                notify.amount = result.get('order_fee')
                 notify.trade_no = result.get('order_id')
                 # 扣除用户账户相应余额
                 user_items = notify.payee
-
-                user_items.credit -= decimal.Decimal(notify.amount)
+                print(user_items.credit)
+                print(notify.amount)
+                user_items.credit -= notify.amount
+                print(user_items.credit)
                 user_items.save()
                 return Response({"code": result.get('code')})
             elif result.get('status') == 'INIT' or result.get('status') == 'DEALING':
