@@ -437,7 +437,7 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
                 notify.trade_no = result.get('order_id')
                 # 扣除用户账户相应余额
                 user_items = notify.payee
-                user_items.credit -= notify.amount
+                user_items.credit -= decimal.Decimal(notify.amount)
                 user_items.save()
                 return Response({"code": result.get('code')})
             elif result.get('status') == 'INIT' or result.get('status') == 'DEALING':
