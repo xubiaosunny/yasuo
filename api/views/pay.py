@@ -42,6 +42,23 @@ class MyAliPay(AliPay):
             raw_string, "alipay_fund_trans_toaccount_transfer_response"
         )
 
+    def api_alipay_fund_trans_order_query(self, out_biz_no=None, order_id=None):
+        if out_biz_no is None and order_id is None:
+            raise Exception("Both out_biz_no and order_id are None!")
+
+        biz_content = {}
+        if out_biz_no:
+            biz_content["out_biz_no"] = out_biz_no
+        if order_id:
+            biz_content["order_id"] = order_id
+
+        data = self.build_body("alipay.fund.trans.order.query", biz_content)
+
+        url = self._gateway + "?" + self.sign_data(data)
+        raw_string = urlopen(url, timeout=15).read().decode("utf-8")
+        return self._verify_and_return_sync_response(
+            raw_string, "alipay_fund_trans_order_query_response"
+        )
 
     def _verify_and_return_sync_response(self, raw_string, response_type):
         """
@@ -395,7 +412,7 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
         # 初始化
         app_private_key_string = open(os.path.join(settings.BASE_DIR, "app_private_key.pem")).read()
         alipay_public_key_string = open(os.path.join(settings.BASE_DIR, "alipay_public_key.pem")).read()
-        alipay = AliPay(
+        alipay = MyAliPay(
             appid="2019080766140322",
             app_notify_url=None,
             app_private_key_string=app_private_key_string,
