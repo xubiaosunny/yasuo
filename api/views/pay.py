@@ -387,7 +387,7 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
 
     def post(self, request):
         # 接收参数
-        serializer = OrderInfoSerializer(data=request.data)
+        serializer = AliExtractPayNotifySerializer(data=request.data)
         if not serializer.is_valid():
             return response_400(serializer.errors)
         out_biz_no = serializer.validated_data.get('out_biz_no')
