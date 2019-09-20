@@ -422,14 +422,14 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
                 user_items = notify.payee
                 user_items.credit -= notify.amount
                 user_items.save()
-                return Response('success')
+                return Response({"code": result.get('code')})
             elif result.get('status') == 'INIT' or result.get('status') == 'DEALING':
                 # 等待买家付款
                 time.sleep(10)
                 continue
             else:
                 # 支付出错
-                return JsonResponse({'res': 4, "message": '支付失败'})
+                return JsonResponse({"code": result.get('code'), "message": result.get('fail_reason')})
 
 
 class PayInfo(generics.GenericAPIView):
