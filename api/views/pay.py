@@ -375,7 +375,7 @@ class ExtractPayVIew(generics.GenericAPIView):
             )
             print(result)
             if result.get('code') == 10000 or "10000":
-                return JsonResponse({"code": result.get("code"), 'res': result.get("sub_msg"), 'result': result, 'out_biz_no': out_biz_no}, cls=DecimalEncoder)
+                return JsonResponse({"code": result.get("code"), 'res': result.get("sub_msg"), 'result': result, 'out_biz_no': result.get("out_biz_no")}, cls=DecimalEncoder)
             else:
                 return JsonResponse({"code": result.get("code"), "res": result.get("sub_msg")})
 
