@@ -96,17 +96,10 @@ class WorksCommentView(generics.GenericAPIView):
         serializer = WorksCommentSerializer(data=request.data)
         if not serializer.is_valid():
             return response_400(serializer.errors)
-        try:
-            WorksComment.objects.get(user=request.user, works=works)
-        except ObjectDoesNotExist:
-            comment = WorksComment.objects.create(user=request.user, works=works, **serializer.validated_data)
-            send_push_j(works.user_id, '%s评论了你的作品' % (request.user.full_name or request.user.phone,),
-                        class_name=Message.CLASS_NAME_CHOICES[3][0], class_id=comment.id)
-            return response_200(comment.details())
-        except Exception as e:
-            raise e
-        else:
-            return response_400({'voice': _('You have commented on the work')})
+        comment = WorksComment.objects.create(user=request.user, works=works, **serializer.validated_data)
+        send_push_j(works.user_id, '%s评论了你的作品' % (request.user.full_name or request.user.phone,),
+                    class_name=Message.CLASS_NAME_CHOICES[3][0], class_id=comment.id)
+        return response_200(comment.details())
 
 
 class WorksQuestionView(generics.GenericAPIView):

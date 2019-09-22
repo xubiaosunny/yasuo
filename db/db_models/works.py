@@ -82,7 +82,7 @@ class WorksComment(models.Model):
         data['user'] = self.user.to_dict()
         # data['works'] = self.works.details()
         data['comment'] = self.voice.details()
-        data['is_pay'] = self.is_pay
+        data['is_pay'] = WorksComment.objects.filter(works=self.works, user=self.user, is_pay=True).exists()
         data['create_time'] = self.create_time
         data['update_time'] = self.update_time
         data['can_question'] = self.is_pay and WorksQuestion.objects.filter(works=self.works, to=self.user).count() == 0
