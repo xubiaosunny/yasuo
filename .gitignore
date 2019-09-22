@@ -111,3 +111,5 @@ yasuo/config.py
 .idea/*
 .vscode/*
 media/*
+log/
+celerybeat-schedule.db

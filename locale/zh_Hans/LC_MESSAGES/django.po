@@ -188,3 +188,6 @@ msgstr "状态"
 
 msgid "Introduction"
 msgstr "简介"
+
+msgid "Push Time"
+msgstr "推送时间"

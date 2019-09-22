@@ -139,7 +139,7 @@ class UserFollowView(generics.GenericAPIView):
             return response_400(serializer.errors)
         request.user.follow.add(serializer.data['user_id'])
         send_push_j(serializer.data['user_id'], '%s关注了你' % (request.user.full_name or request.user.phone, ),
-                    class_name=Message.CLASS_NAME_CHOICES[2][0], class_id=serializer.data['user_id'])
+                    class_name=Message.CLASS_NAME_CHOICES[2][0], class_id=request.user.id)
         return response_200(request.user.to_dict())
 
     def delete(self, request):
@@ -269,3 +269,28 @@ class UserMessageChartDetailView(generics.GenericAPIView):
             'works': works.details(),
             'chat_list': [{**i.details(), 'class': i.__class__.__name__}
                           for i in sorted(chat_list, key=lambda x: x.create_time)]})
+
+
+class UserQuestionView(generics.ListAPIView):
+    """
+    用户的提问
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        questions = WorksQuestion.objects.filter(works__user=request.user)
+        return response_200({'questions': [{**q.details(), 'works': q.works.details()} for q in questions]})
+
+
+class UserQuestionDetailsView(generics.ListAPIView):
+    """
+    用户的提问
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, _id):
+        question = get_object_or_404(WorksQuestion, pk=_id, works__user=request.user)
+        data = question.details()
+        data['works'] = question.works.details()
+        data['reply_list'] = [r.details() for r in question.worksquestionreply_set.all()]
+        return response_200(data)

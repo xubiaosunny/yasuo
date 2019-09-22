@@ -143,6 +143,7 @@ class Certification(models.Model):
     reject_cause = models.TextField(_('Reject Cause'), default='', blank=True)
     create_time = models.DateTimeField(_('Create Time'), auto_now_add=True, blank=True)
     update_time = models.DateTimeField(_('Update Time'), auto_now=True, blank=True)
+    push_time = models.DateTimeField(_('Push Time'), default=None, null=True, blank=True)
 
     class Meta:
         verbose_name = _('User Authentication')
@@ -195,7 +196,7 @@ class Message(models.Model):
         ('CustomUser', 'CustomUser'),
         ('WorksComment', 'WorksComment'),
     )
-    user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
+    user = models.ForeignKey(CustomUser, on_delete=models.PROTECT, null=True, default=None)
     message = models.CharField(_('Message'), max_length=255)
     class_name = models.CharField(max_length=50, choices=CLASS_NAME_CHOICES)
     class_id = models.IntegerField()
