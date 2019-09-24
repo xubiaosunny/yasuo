@@ -21,6 +21,7 @@ class TransferInfoSerializer(serializers.ModelSerializer):
         model = TransferInfo
         fields = ('payee_account', 'pay_method', 'amount', 'payee_type', 'payee_real_name')
 
+
 class AliExtractPayNotifySerializer(serializers.ModelSerializer):
     class Meta:
         model = TransferInfo

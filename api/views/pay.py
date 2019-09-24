@@ -18,6 +18,7 @@ import decimal
 from rest_framework import serializers
 from utils.tasks.push import send_push_j
 from alipay.compat import urlopen
+from alipay.exceptions import AliPayException, AliPayValidationError
 
 
 class MyAliPay(AliPay):
@@ -40,6 +41,60 @@ class MyAliPay(AliPay):
         return self._verify_and_return_sync_response(
             raw_string, "alipay_fund_trans_toaccount_transfer_response"
         )
+
+    def api_alipay_fund_trans_order_query(self, out_biz_no=None, order_id=None):
+        if out_biz_no is None and order_id is None:
+            raise Exception("Both out_biz_no and order_id are None!")
+
+        biz_content = {}
+        if out_biz_no:
+            biz_content["out_biz_no"] = out_biz_no
+        if order_id:
+            biz_content["order_id"] = order_id
+
+        data = self.build_body("alipay.fund.trans.order.query", biz_content)
+
+        url = self._gateway + "?" + self.sign_data(data)
+        raw_string = urlopen(url, timeout=15).read().decode("utf-8")
+        return self._verify_and_return_sync_response(
+            raw_string, "alipay_fund_trans_order_query_response"
+        )
+
+    def _verify_and_return_sync_response(self, raw_string, response_type):
+        """
+        return response if verification succeeded, raise exception if not
+
+        As to issue #69, json.loads(raw_string)[response_type] should not be returned directly,
+        use json.loads(plain_content) instead
+
+        failed response is like this
+        {
+          "alipay_trade_query_response": {
+            "sub_code": "isv.invalid-app-id",
+            "code": "40002",
+            "sub_msg": "无效的AppID参数",
+            "msg": "Invalid Arguments"
+          }
+        }
+        """
+
+        response = json.loads(raw_string)
+        # raise exceptions
+        if "sign" not in response.keys():
+            result = response[response_type]
+            raise AliPayException(
+                code=result.get("code", "0"),
+                message=raw_string
+            )
+
+        sign = response["sign"]
+
+        # locate string to be signed
+        plain_content = self._get_string_to_be_signed(raw_string, response_type)
+
+        # if not self._verify(plain_content, sign):
+        #     raise AliPayValidationError
+        return json.loads(plain_content)
 
 
 class DecimalEncoder(json.JSONEncoder):
@@ -81,10 +136,7 @@ class AliPayNotifyView(generics.GenericAPIView):
         # user_items = CustomUser.objects.get(id=order.payee)
         user_items = order.payee
         monery = order.amount / 2
-        print("monery---------", monery)
-        print(" 11111111111    ", user_items.credit)
         user_items.credit += decimal.Decimal(monery)
-        print("22222    ", user_items.credit)
         user_items.save()
         return Response('success')
 
@@ -303,7 +355,7 @@ class ExtractPayVIew(generics.GenericAPIView):
         # 初始化
         app_private_key_string = open(os.path.join(settings.BASE_DIR, "app_private_key.pem")).read()
         alipay_public_key_string = open(os.path.join(settings.BASE_DIR, "alipay_public_key.pem")).read()
-        alipay = AliPay(
+        alipay = MyAliPay(
             appid="2019080766140322",
             app_notify_url=None,
             app_private_key_string=app_private_key_string,
@@ -326,7 +378,7 @@ class ExtractPayVIew(generics.GenericAPIView):
                 pay_method=pay_method,
                 payee=user,
                 amount=decimal.Decimal(amount),
-                # payee_real_name=payee_real_name
+                payee_real_name=payee_real_name
             )
             # transfer money to alipay account
             result = alipay.api_alipay_fund_trans_toaccount_transfer(
@@ -336,12 +388,19 @@ class ExtractPayVIew(generics.GenericAPIView):
                 # payee_account="csqnji8117@sandbox.com",
                 payee_account=payee_account,
                 amount=str(amount),
-                # payee_real_name=payee_real_name
+                payee_real_name=payee_real_name
             )
-            if result.get('code') == 10000:
-                return JsonResponse({'res': 'ok', 'result': result, 'out_biz_no': out_biz_no}, cls=DecimalEncoder)
+
+            if result.get('code') == "10000":
+                data = {
+                    "code": result.get("code"),
+                    'message': result.get("sub_msg"),
+                    'result': result,
+                    'out_biz_no': result.get("out_biz_no"),
+                }
+                return JsonResponse(data)
             else:
-                return JsonResponse({"res": result.get("sub_msg")})
+                return JsonResponse({"code": result.get("code"), "message": result.get("sub_msg")})
 
 
 class AliExtractPayNotifyView(generics.GenericAPIView):
@@ -351,7 +410,7 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
 
     def post(self, request):
         # 接收参数
-        serializer = OrderInfoSerializer(data=request.data)
+        serializer = AliExtractPayNotifySerializer(data=request.data)
         if not serializer.is_valid():
             return response_400(serializer.errors)
         out_biz_no = serializer.validated_data.get('out_biz_no')
@@ -359,7 +418,7 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
         # 初始化
         app_private_key_string = open(os.path.join(settings.BASE_DIR, "app_private_key.pem")).read()
         alipay_public_key_string = open(os.path.join(settings.BASE_DIR, "alipay_public_key.pem")).read()
-        alipay = AliPay(
+        alipay = MyAliPay(
             appid="2019080766140322",
             app_notify_url=None,
             app_private_key_string=app_private_key_string,
@@ -372,28 +431,30 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
             result = alipay.api_alipay_fund_trans_order_query(
                 out_biz_no=out_biz_no
             )
+            print("**"*30)
             print(result)
             if result.get('code') == '10000' and result.get('status') == 'SUCCESS':
-                """若回调不成功可以使用这个"""
                 # 支付成功
                 # 获取支付宝交易号
                 # 更新支付订单信息
                 notify = TransferInfo.objects.get(out_biz_no=out_biz_no)
                 notify.status = result.get('status')
-                notify.amount = result.get('order_fee')
                 notify.trade_no = result.get('order_id')
                 # 扣除用户账户相应余额
                 user_items = notify.payee
+                print(user_items.credit)
+                print(notify.amount)
                 user_items.credit -= notify.amount
+                print(user_items.credit)
                 user_items.save()
-                return Response('success')
+                return Response({"code": result.get('code')})
             elif result.get('status') == 'INIT' or result.get('status') == 'DEALING':
                 # 等待买家付款
                 time.sleep(10)
                 continue
             else:
                 # 支付出错
-                return JsonResponse({'res': 4, "message": '支付失败'})
+                return JsonResponse({"code": result.get('code'), "message": result.get('fail_reason')})
 
 
 class PayInfo(generics.GenericAPIView):
@@ -428,7 +489,7 @@ class PayInfo(generics.GenericAPIView):
         info_lists = sorted(info_lists, key=lambda x: x["time"], reverse=True)
         data = {
             "data": info_lists,
-            "balance": int(balance)
+            "balance": balance
         }
         return JsonResponse(data, safe=False)
 

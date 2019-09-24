@@ -254,6 +254,8 @@ class UserMessageChartDetailView(generics.GenericAPIView):
         if request.user.role == CustomUser.ROLE_CHOICES[0][0]:
             teacher = request.user
         else:
+            if isinstance(class_instance, Works):
+                return response_403()
             teacher = class_instance.user if isinstance(class_instance, WorksComment) else class_instance.to
         chat_list = []
         for c in WorksComment.objects.filter(works=works, user=teacher):
