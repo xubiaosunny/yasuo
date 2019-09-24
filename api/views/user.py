@@ -235,7 +235,7 @@ class UserMessageReadView(generics.GenericAPIView):
 
 class UserMessageChartDetailView(generics.GenericAPIView):
     """
-    标记消息已读
+    消息详情
     """
     serializer_class = serializers.Serializer
     permission_classes = (IsAuthenticated,)
@@ -255,16 +255,15 @@ class UserMessageChartDetailView(generics.GenericAPIView):
             teacher = request.user
         else:
             teacher = class_instance.user if isinstance(class_instance, WorksComment) else class_instance.to
-        comments = WorksComment.objects.filter(works=works, user=teacher)
         chat_list = []
-        if comments.count() > 0:
-            chat_list.append(comments[0])
+        for c in WorksComment.objects.filter(works=works, user=teacher):
+            chat_list.append(c)
         for q in WorksQuestion.objects.filter(works=works, to=teacher):
             chat_list.append(q)
             chat_list.extend(list(WorksQuestionReply.objects.filter(works_question=q)))
 
         return response_200({
-            'works': works.details(),
+            'works': works.details(), 'teacher_id': teacher.id,
             'chat_list': [{**i.details(), 'class': i.__class__.__name__}
                           for i in sorted(chat_list, key=lambda x: x.create_time)]})
 
