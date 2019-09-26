@@ -131,6 +131,7 @@ class WorksQuestionReply(models.Model):
         data['id'] = self.id
         data['user'] = self.works_question.to.to_dict()
         data['works_question'] = self.works_question_id
+        data['is_pay'] = self.works_question.is_pay
         data['voice'] = self.voice.details()
         data['create_time'] = self.create_time
         return data
