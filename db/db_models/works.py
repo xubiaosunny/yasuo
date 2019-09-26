@@ -108,6 +108,7 @@ class WorksQuestion(models.Model):
         # data['works'] = self.works.details()
         data['works_id'] = self.works_id
         data['to'] = self.to.to_dict()
+        data['user'] = self.works.user.to_dict()
         data['question'] = self.question
         data['is_pay'] = self.is_pay
         data['create_time'] = self.create_time
@@ -128,6 +129,7 @@ class WorksQuestionReply(models.Model):
     def details(self):
         data = dict()
         data['id'] = self.id
+        data['user'] = self.works_question.to.to_dict()
         data['works_question'] = self.works_question_id
         data['voice'] = self.voice.details()
         data['create_time'] = self.create_time
