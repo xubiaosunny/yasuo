@@ -118,6 +118,10 @@ class WorksQuestionView(generics.GenericAPIView):
         serializer = WorksQuestionSerializer(data=request.data)
         if not serializer.is_valid():
             return response_400(serializer.errors)
+        last_question = WorksQuestion.objects.filter(
+            works=works, to=serializer.validated_data["to"]).order_by("-create_time").first()
+        if last_question and last_question.worksquestionreply_set.count() == 0:
+            return response_400({"to": "老师还未回复你上一个提问，请稍后再向他提问"})
         question = WorksQuestion.objects.create(works=works, **serializer.validated_data)
         send_push_j(question.to_id, '%s向你提问了' % (request.user.full_name or request.user.phone,),
                     class_name=Message.CLASS_NAME_CHOICES[1][0], class_id=question.id)
