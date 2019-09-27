@@ -22,6 +22,7 @@ urlpatterns = [
     path('user/message/<int:_id>/chat_detail/', user.UserMessageChartDetailView.as_view()),
     path('user/question/', user.UserQuestionView.as_view()),
     path('user/question/<int:_id>/details/', user.UserQuestionDetailsView.as_view()),
+    path('user/comment/', user.UserCommentView.as_view()),
 
     path('storage/local_storage/', storage.LocalStorageView.as_view()),
 

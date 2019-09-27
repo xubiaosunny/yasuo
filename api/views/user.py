@@ -293,3 +293,14 @@ class UserQuestionDetailsView(generics.ListAPIView):
         data['works'] = question.works.details()
         data['reply_list'] = [r.details() for r in question.worksquestionreply_set.all()]
         return response_200(data)
+
+
+class UserCommentView(generics.ListAPIView):
+    """
+    用户的评论
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        comments = WorksComment.objects.filter(works__user=request.user)
+        return response_200({'comments': [{**c.details(), 'works': c.works.details()} for c in comments]})
