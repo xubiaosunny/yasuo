@@ -23,6 +23,9 @@ urlpatterns = [
     path('user/question/', user.UserQuestionView.as_view()),
     path('user/question/<int:_id>/details/', user.UserQuestionDetailsView.as_view()),
     path('user/comment/', user.UserCommentView.as_view()),
+    path('user/comment/<int:_id>/details/', user.UserCommentDetailsView.as_view()),
+    path('user/reply/', user.UserReplyView.as_view()),
+    path('user/reply/<int:_id>/details/', user.UserReplyDetailsView.as_view()),
 
     path('storage/local_storage/', storage.LocalStorageView.as_view()),
 
