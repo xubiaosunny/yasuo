@@ -313,7 +313,7 @@ class UserCommentDetailsView(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, _id):
-        comment = get_object_or_404(WorksComment, pk=_id, works__user=request.user)
+        comment = get_object_or_404(WorksComment, pk=_id, user=request.user)
         data = {}
         data['works'] = comment.works.details()
         data['comments'] = [r.details() for r in WorksComment.objects.filter(works=comment.works, works__user=request.user)]
@@ -338,7 +338,7 @@ class UserReplyDetailsView(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, _id):
-        reply = get_object_or_404(WorksQuestionReply, pk=_id, works__user=request.user)
+        reply = get_object_or_404(WorksQuestionReply, pk=_id, works_question__to=request.user)
         data = {}
         data['question'] = reply.works_question.details()
         data['replies'] = [r.details() for r in reply.works_question.worksquestionreply_set.all()]
