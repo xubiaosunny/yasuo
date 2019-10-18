@@ -316,7 +316,7 @@ class UserCommentDetailsView(generics.ListAPIView):
         comment = get_object_or_404(WorksComment, pk=_id, user=request.user)
         data = {}
         data['works'] = comment.works.details()
-        data['comments'] = [r.details() for r in WorksComment.objects.filter(works=comment.works, works__user=request.user)]
+        data['comments'] = [r.details() for r in WorksComment.objects.filter(works=comment.works, user=request.user)]
         return response_200(data)
 
 
