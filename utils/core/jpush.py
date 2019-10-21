@@ -10,7 +10,9 @@ push = _jpush.create_push()
 
 def push_message(tags, message, platform=jpush.all_, extras=None):
     push.audience = jpush.all_ if tags == jpush.all_ else jpush.audience({"tag": tags})
-    push.notification = jpush.notification(alert=message)
+    push.notification = jpush.notification(alert=message, ios=jpush.ios(message, extras=extras),
+                                           android=jpush.android(message, extras=extras),
+                                           winphone=jpush.winphone(message, extras=extras))
     push.message = jpush.message(message, extras=extras)
     push.platform = platform
     try:
