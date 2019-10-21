@@ -430,30 +430,24 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
             result = alipay.api_alipay_fund_trans_order_query(
                 out_biz_no=out_biz_no
             )
-            print("*" * 20)
-            print(result)
             if result.get('code') == '10000' and result.get('status') == 'SUCCESS':
                 # 支付成功
                 # 获取支付宝交易号
                 # 更新支付订单信息
                 notify = TransferInfo.objects.get(out_biz_no=out_biz_no)
-                print(11111111111111111111)
-                print(result.get('status'))
                 notify.status = result.get('status')
                 notify.trade_no = result.get('order_id')
+                notify.save()
                 # 扣除用户账户相应余额
                 user_items = notify.payee
-                print(user_items.credit)
                 user_items.credit -= notify.amount
-                print(user_items.credit)
                 user_items.save()
                 return Response({"code": result.get('code')})
-            elif result.get('status') == 'Init' or result.get('status') == 'Dealing':
+            elif result.get('status') == 'INIT' or result.get('status') == 'DEALING':
                 # 等待买家付款
                 time.sleep(10)
                 continue
             else:
-                print('支付出错')
                 # 支付出错
                 return JsonResponse({"code": result.get('code'), "message": result.get('fail_reason')})
 
