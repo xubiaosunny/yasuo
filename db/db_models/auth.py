@@ -104,9 +104,6 @@ class CustomUser(AbstractBaseUser):
         # Simplest possible answer: All admins are staff
         return self.is_admin
 
-    def get_username(self):
-        return self.full_name or self.phone
-
     def to_dict(self, detail=False, guest=None):
         data = model_to_dict(self, exclude=['password', 'follow', 'avatar'])
         data['avatar_url'] = self.avatar.file.url if self.avatar else ''

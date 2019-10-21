@@ -46,7 +46,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = '__all__'
+        fields = ('phone', 'role', 'full_name', 'province', 'city', 'grade', 'work_place', 'is_active', 'is_admin')
 
     # def clean_password(self):
     #     # Regardless of what the user provides, return the initial value.
@@ -86,7 +86,7 @@ class UserAdmin(BaseUserAdmin):
         (None, {'fields': ('phone', )}),
         ('Change Password', {'fields': ('password1', 'password2',)}),
         ('Personal info', {'fields': ('role', 'full_name', 'province', 'city', 'grade', 'work_place',)}),
-        ('Permissions', {'fields': ('is_admin',)}),
+        ('Permissions', {'fields': ('is_active', 'is_admin')}),
     )
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
     # overrides get_fieldsets to use this attribute when creating a user.
