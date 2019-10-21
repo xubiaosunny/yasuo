@@ -47,7 +47,6 @@ class UserChangeForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = '__all__'
-        readonly_fields = ["phone"]
 
     # def clean_password(self):
     #     # Regardless of what the user provides, return the initial value.
@@ -98,6 +97,7 @@ class UserAdmin(BaseUserAdmin):
         ),
     )
     search_fields = ('phone',)
+    readonly_fields = ("phone", )
     ordering = ('date_joined',)
     filter_horizontal = ()
 
