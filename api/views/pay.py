@@ -378,7 +378,7 @@ class ExtractPayVIew(generics.GenericAPIView):
                 pay_method=pay_method,
                 payee=user,
                 amount=decimal.Decimal(amount),
-                payee_real_name=payee_real_name
+                payee_real_name=payee_real_name,
             )
             # transfer money to alipay account
             result = alipay.api_alipay_fund_trans_toaccount_transfer(
@@ -390,7 +390,6 @@ class ExtractPayVIew(generics.GenericAPIView):
                 amount=str(amount),
                 payee_real_name=payee_real_name
             )
-
             if result.get('code') == "10000":
                 data = {
                     "code": result.get("code"),
@@ -431,8 +430,6 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
             result = alipay.api_alipay_fund_trans_order_query(
                 out_biz_no=out_biz_no
             )
-            print("**"*30)
-            print(result)
             if result.get('code') == '10000' and result.get('status') == 'SUCCESS':
                 # 支付成功
                 # 获取支付宝交易号
@@ -440,12 +437,10 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
                 notify = TransferInfo.objects.get(out_biz_no=out_biz_no)
                 notify.status = result.get('status')
                 notify.trade_no = result.get('order_id')
+                notify.save()
                 # 扣除用户账户相应余额
                 user_items = notify.payee
-                print(user_items.credit)
-                print(notify.amount)
                 user_items.credit -= notify.amount
-                print(user_items.credit)
                 user_items.save()
                 return Response({"code": result.get('code')})
             elif result.get('status') == 'INIT' or result.get('status') == 'DEALING':
@@ -496,7 +491,7 @@ class PayInfo(generics.GenericAPIView):
 
 class ExtractPayInfo(generics.GenericAPIView):
     """提现记录"""
-    serializer_class = AliExtractPayNotifySerializer
+    # serializer_class = AliExtractPayNotifySerializer
     permission_classes = (AllowAny,)
 
     def post(self, request):
