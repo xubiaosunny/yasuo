@@ -390,6 +390,8 @@ class ExtractPayVIew(generics.GenericAPIView):
                 amount=str(amount),
                 payee_real_name=payee_real_name
             )
+            print("*"*20)
+            print(result)
             if result.get('code') == "10000":
                 data = {
                     "code": result.get("code"),
