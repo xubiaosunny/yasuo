@@ -432,7 +432,7 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
             )
             print("*" * 20)
             print(result)
-            if result.get('code') == '10000' and result.get('status') == 'Success':
+            if result.get('code') == '10000' and result.get('status') == 'SUCCESS':
                 # 支付成功
                 # 获取支付宝交易号
                 # 更新支付订单信息
@@ -507,7 +507,7 @@ class ExtractPayInfo(generics.GenericAPIView):
         if drawing:
             for i in drawing:
                 info_dict = {}
-                if i.status == 'Success':
+                if i.status == 'SUCCESS':
                     info_dict['full_name'] = i.payee.full_name
                     info_dict['time'] = i.create_time
                     info_dict['amount'] = i.amount
