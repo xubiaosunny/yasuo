@@ -378,7 +378,7 @@ class ExtractPayVIew(generics.GenericAPIView):
                 pay_method=pay_method,
                 payee=user,
                 amount=decimal.Decimal(amount),
-                payee_real_name=payee_real_name
+                payee_real_name=payee_real_name,
             )
             # transfer money to alipay account
             result = alipay.api_alipay_fund_trans_toaccount_transfer(
@@ -398,6 +398,8 @@ class ExtractPayVIew(generics.GenericAPIView):
                     'result': result,
                     'out_biz_no': result.get("out_biz_no"),
                 }
+
+
                 return JsonResponse(data)
             else:
                 return JsonResponse({"code": result.get("code"), "message": result.get("sub_msg")})
@@ -431,9 +433,7 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
             result = alipay.api_alipay_fund_trans_order_query(
                 out_biz_no=out_biz_no
             )
-            print("**"*30)
-            print(result)
-            if result.get('code') == '10000' and result.get('status') == 'SUCCESS':
+            if result.get('code') == '10000' and result.get('status') == 'Success':
                 # 支付成功
                 # 获取支付宝交易号
                 # 更新支付订单信息
@@ -442,13 +442,10 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
                 notify.trade_no = result.get('order_id')
                 # 扣除用户账户相应余额
                 user_items = notify.payee
-                print(user_items.credit)
-                print(notify.amount)
                 user_items.credit -= notify.amount
-                print(user_items.credit)
                 user_items.save()
                 return Response({"code": result.get('code')})
-            elif result.get('status') == 'INIT' or result.get('status') == 'DEALING':
+            elif result.get('status') == 'Init' or result.get('status') == 'Dealing':
                 # 等待买家付款
                 time.sleep(10)
                 continue
@@ -496,7 +493,7 @@ class PayInfo(generics.GenericAPIView):
 
 class ExtractPayInfo(generics.GenericAPIView):
     """提现记录"""
-    serializer_class = AliExtractPayNotifySerializer
+    # serializer_class = AliExtractPayNotifySerializer
     permission_classes = (AllowAny,)
 
     def post(self, request):
@@ -506,7 +503,7 @@ class ExtractPayInfo(generics.GenericAPIView):
         if drawing:
             for i in drawing:
                 info_dict = {}
-                if i.status == 'SUCCESS':
+                if i.status == 'Success':
                     info_dict['full_name'] = i.payee.full_name
                     info_dict['time'] = i.create_time
                     info_dict['amount'] = i.amount
