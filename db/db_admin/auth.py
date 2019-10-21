@@ -97,7 +97,6 @@ class UserAdmin(BaseUserAdmin):
         ),
     )
     search_fields = ('phone',)
-    readonly_fields = ("phone", )
     ordering = ('date_joined',)
     filter_horizontal = ()
 
