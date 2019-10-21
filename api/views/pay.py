@@ -390,8 +390,6 @@ class ExtractPayVIew(generics.GenericAPIView):
                 amount=str(amount),
                 payee_real_name=payee_real_name
             )
-            print("*"*20)
-            print(result)
             if result.get('code') == "10000":
                 data = {
                     "code": result.get("code"),
@@ -432,6 +430,8 @@ class AliExtractPayNotifyView(generics.GenericAPIView):
             result = alipay.api_alipay_fund_trans_order_query(
                 out_biz_no=out_biz_no
             )
+            print("*" * 20)
+            print(result)
             if result.get('code') == '10000' and result.get('status') == 'Success':
                 # 支付成功
                 # 获取支付宝交易号
