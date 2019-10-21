@@ -390,7 +390,6 @@ class ExtractPayVIew(generics.GenericAPIView):
                 amount=str(amount),
                 payee_real_name=payee_real_name
             )
-
             if result.get('code') == "10000":
                 data = {
                     "code": result.get("code"),
@@ -398,8 +397,6 @@ class ExtractPayVIew(generics.GenericAPIView):
                     'result': result,
                     'out_biz_no': result.get("out_biz_no"),
                 }
-
-
                 return JsonResponse(data)
             else:
                 return JsonResponse({"code": result.get("code"), "message": result.get("sub_msg")})
