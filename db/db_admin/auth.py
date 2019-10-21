@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.contrib.auth.forms import ReadOnlyPasswordHashField, UsernameField
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
@@ -46,7 +46,8 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ('phone', 'password', 'role', 'full_name', 'province', 'city', 'grade', 'work_place', 'is_active', 'is_admin')
+        fields = '__all__'
+        field_classes = {'phone': UsernameField}
 
     # def clean_password(self):
     #     # Regardless of what the user provides, return the initial value.
