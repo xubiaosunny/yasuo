@@ -82,7 +82,7 @@ class WorksComment(models.Model):
         data['user'] = self.user.to_dict()
         # data['works'] = self.works.details()
         data['comment'] = self.voice.details()
-        data['is_pay'] = self.is_pay
+        data['is_pay'] = WorksComment.objects.filter(works=self.works, user=self.user, is_pay=True).exists()
         data['create_time'] = self.create_time
         data['update_time'] = self.update_time
         data['can_question'] = self.is_pay and WorksQuestion.objects.filter(works=self.works, to=self.user).count() == 0
@@ -108,6 +108,7 @@ class WorksQuestion(models.Model):
         # data['works'] = self.works.details()
         data['works_id'] = self.works_id
         data['to'] = self.to.to_dict()
+        data['user'] = self.works.user.to_dict()
         data['question'] = self.question
         data['is_pay'] = self.is_pay
         data['create_time'] = self.create_time
@@ -128,7 +129,9 @@ class WorksQuestionReply(models.Model):
     def details(self):
         data = dict()
         data['id'] = self.id
+        data['user'] = self.works_question.to.to_dict()
         data['works_question'] = self.works_question_id
+        data['is_pay'] = self.works_question.is_pay
         data['voice'] = self.voice.details()
         data['create_time'] = self.create_time
         return data

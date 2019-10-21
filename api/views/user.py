@@ -235,7 +235,7 @@ class UserMessageReadView(generics.GenericAPIView):
 
 class UserMessageChartDetailView(generics.GenericAPIView):
     """
-    标记消息已读
+    消息详情
     """
     serializer_class = serializers.Serializer
     permission_classes = (IsAuthenticated,)
@@ -254,17 +254,18 @@ class UserMessageChartDetailView(generics.GenericAPIView):
         if request.user.role == CustomUser.ROLE_CHOICES[0][0]:
             teacher = request.user
         else:
+            if isinstance(class_instance, Works):
+                return response_403()
             teacher = class_instance.user if isinstance(class_instance, WorksComment) else class_instance.to
-        comments = WorksComment.objects.filter(works=works, user=teacher)
         chat_list = []
-        if comments.count() > 0:
-            chat_list.append(comments[0])
+        for c in WorksComment.objects.filter(works=works, user=teacher):
+            chat_list.append(c)
         for q in WorksQuestion.objects.filter(works=works, to=teacher):
             chat_list.append(q)
             chat_list.extend(list(WorksQuestionReply.objects.filter(works_question=q)))
 
         return response_200({
-            'works': works.details(),
+            'works': works.details(), 'teacher_id': teacher.id,
             'chat_list': [{**i.details(), 'class': i.__class__.__name__}
                           for i in sorted(chat_list, key=lambda x: x.create_time)]})
 
@@ -291,4 +292,54 @@ class UserQuestionDetailsView(generics.ListAPIView):
         data = question.details()
         data['works'] = question.works.details()
         data['reply_list'] = [r.details() for r in question.worksquestionreply_set.all()]
+        return response_200(data)
+
+
+class UserCommentView(generics.ListAPIView):
+    """
+    用户的评论
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        comments = WorksComment.objects.filter(user=request.user)
+        return response_200({'comments': [{**c.details(), 'works': c.works.details()} for c in comments]})
+
+
+class UserCommentDetailsView(generics.ListAPIView):
+    """
+    用户的评论详情（作品）
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, _id):
+        comment = get_object_or_404(WorksComment, pk=_id, user=request.user)
+        data = {}
+        data['works'] = comment.works.details()
+        data['comments'] = [r.details() for r in WorksComment.objects.filter(works=comment.works, user=request.user)]
+        return response_200(data)
+
+
+class UserReplyView(generics.ListAPIView):
+    """
+    用户的回复
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        questions = WorksQuestion.objects.filter(to=request.user)
+        return response_200({'reply': [{**r.details(), 'question': q.details(), 'works': q.works.details()} for q in questions for r in q.worksquestionreply_set.all()]})
+
+
+class UserReplyDetailsView(generics.ListAPIView):
+    """
+    用户的回复（提问）
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, _id):
+        reply = get_object_or_404(WorksQuestionReply, pk=_id, works_question__to=request.user)
+        data = {}
+        data['question'] = reply.works_question.details()
+        data['replies'] = [r.details() for r in reply.works_question.worksquestionreply_set.all()]
         return response_200(data)
