@@ -12,9 +12,8 @@ __all__ = ['send_push_j', 'teacher_station']
 @shared_task
 def send_push_j(user_id, message, class_name=None, class_id=None):
     logging.info(f"push params is user_id: {user_id}, message: {message}, class_name: {class_name}, class_id: {class_id}")
-    res = push_message([user_id], message)
-    if res:
-        Message.objects.create(user_id=user_id, message=message, class_name=class_name, class_id=class_id)
+    msg = Message.objects.create(user_id=user_id, message=message, class_name=class_name, class_id=class_id)
+    push_message([user_id], message, extras=msg.details())
 
 
 @shared_task

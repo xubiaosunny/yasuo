@@ -8,9 +8,10 @@ push = _jpush.create_push()
 # _jpush.set_logging("DEBUG")
 
 
-def push_message(tags, message, platform=jpush.all_):
+def push_message(tags, message, platform=jpush.all_, extras=None):
     push.audience = jpush.all_ if tags == jpush.all_ else jpush.audience({"tag": tags})
     push.notification = jpush.notification(alert=message)
+    push.message = jpush.message(message, extras=extras)
     push.platform = platform
     try:
         response = push.send()
