@@ -46,7 +46,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ('phone', 'password', 'is_active', 'is_admin')
+        fields = ('phone', 'password', 'role', 'full_name', 'province', 'city', 'grade', 'work_place', 'is_active', 'is_admin')
 
     # def clean_password(self):
     #     # Regardless of what the user provides, return the initial value.
@@ -80,8 +80,8 @@ class UserAdmin(BaseUserAdmin):
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
-    list_display = ('phone', 'role', 'full_name', 'is_admin', 'date_joined')
-    list_filter = ('is_admin',)
+    list_display = ('phone', 'role', 'full_name', 'is_active', 'is_admin', 'date_joined')
+    list_filter = ('is_admin', 'role')
     fieldsets = (
         (None, {'fields': ('phone', )}),
         ('Change Password', {'fields': ('password1', 'password2',)}),
