@@ -47,7 +47,7 @@ class UserChangeForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = '__all__'
-        field_classes = {'phone': UsernameField}
+        readonly_fields = ["phone"]
 
     # def clean_password(self):
     #     # Regardless of what the user provides, return the initial value.
