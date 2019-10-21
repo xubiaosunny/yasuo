@@ -328,7 +328,7 @@ class UserReplyView(generics.ListAPIView):
 
     def get(self, request):
         questions = WorksQuestion.objects.filter(to=request.user)
-        return response_200({'reply': [{**r.details(), 'question': q.details()} for q in questions for r in q.worksquestionreply_set.all()]})
+        return response_200({'reply': [{**r.details(), 'question': q.details(), 'works': q.works.details()} for q in questions for r in q.worksquestionreply_set.all()]})
 
 
 class UserReplyDetailsView(generics.ListAPIView):
