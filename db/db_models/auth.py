@@ -202,5 +202,5 @@ class Message(models.Model):
 
     def details(self):
         data = model_to_dict(self, exclude=['push_time'])
-        data['push_time'] = self.push_time.strftime('%Y-%m-%d %H:%M:%S')
+        data['push_time'] = timezone.localtime(self.push_time).strftime('%Y-%m-%d %H:%M:%S')
         return data
