@@ -1,5 +1,5 @@
 from rest_framework import generics
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 from db.models import Works
@@ -21,7 +21,7 @@ LIMIT %s, %s;
 
 
 class IndexView(generics.ListAPIView):
-    permission_classes = (AllowAny, )
+    permission_classes = (IsAuthenticatedOrReadOnly, )
 
     def get(self, request):
         """
@@ -44,5 +44,5 @@ class IndexView(generics.ListAPIView):
             works_s = Works.objects.filter(is_delete=False, location=city).order_by('-id')[start:start + limit]
         else:
             works_s = Works.objects.raw(INDEX_SQL, params=[start, start + limit])
-        data = [works.details(user=request.user) if request.user.is_anonymous else works.details() for works in works_s]
+        data = [works.details() if request.user.is_anonymous else works.details(user=request.user) for works in works_s]
         return response_200({'works': data})
