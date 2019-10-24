@@ -148,7 +148,9 @@ class WorksDirectQuestionView(generics.GenericAPIView):
             is_private=serializer.validated_data.get('is_private', False),)
         to = serializer.validated_data.get('to', None)
         if to:
-            WorksQuestion.objects.create(works=works, to_id=to, question=serializer.validated_data.get('question', ''))
+            question = WorksQuestion.objects.create(works=works, to_id=to, question=serializer.validated_data.get('question', ''))
+            send_push_j(question.to_id, '%s向你提问了' % (request.user.full_name or request.user.phone,),
+                        class_name=Message.CLASS_NAME_CHOICES[1][0], class_id=question.id)
         return response_200(works.details())
 
 
