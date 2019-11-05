@@ -491,7 +491,7 @@ class PayInfo(generics.GenericAPIView):
 
 class ExtractPayInfo(generics.GenericAPIView):
     """提现记录"""
-    # serializer_class = AliExtractPayNotifySerializer
+    serializer_class = AliExtractPayNotifySerializer
     permission_classes = (AllowAny,)
 
     def post(self, request):
