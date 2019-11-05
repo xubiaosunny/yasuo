@@ -65,9 +65,16 @@ class WorksComment(models.Model):
     from .auth import CustomUser
     from .storage import LocalStorage
 
+    TYPE_CHOICES = (
+        ('text', _('text')),
+        ('voice', _('voice')),
+    )
+
     works = models.ForeignKey(Works, on_delete=models.PROTECT)
     user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
-    voice = models.ForeignKey(LocalStorage, on_delete=models.PROTECT)
+    type = models.CharField(max_length=50, choices=TYPE_CHOICES)
+    voice = models.ForeignKey(LocalStorage, on_delete=models.PROTECT, blank=True, null=True, default=None)
+    text = models.TextField(blank=True, null=True, default=None)
     is_pay = models.BooleanField(default=False)
     create_time = models.DateTimeField(_('Create Time'), auto_now_add=True)
     update_time = models.DateTimeField(_('Update Time'), auto_now=True)
@@ -81,7 +88,15 @@ class WorksComment(models.Model):
         data['id'] = self.id
         data['user'] = self.user.to_dict()
         # data['works'] = self.works.details()
-        data['comment'] = self.voice.details()
+        data['type'] = self.type
+        data['text'] = self.text
+        data['voice'] = self.voice.details() if self.voice else None
+        if self.type == self.TYPE_CHOICES[0][0]:
+            data['comment'] = data['text']
+        elif self.type == self.TYPE_CHOICES[1][0]:
+            data['comment'] = data['voice']
+        else:
+            data['comment'] = None
         data['is_pay'] = WorksComment.objects.filter(works=self.works, user=self.user, is_pay=True).exists()
         data['create_time'] = self.create_time
         data['update_time'] = self.update_time
@@ -118,8 +133,15 @@ class WorksQuestion(models.Model):
 class WorksQuestionReply(models.Model):
     from .storage import LocalStorage
 
+    TYPE_CHOICES = (
+        ('text', _('text')),
+        ('voice', _('voice')),
+    )
+
     works_question = models.ForeignKey(WorksQuestion, on_delete=models.PROTECT)
-    voice = models.ForeignKey(LocalStorage, on_delete=models.PROTECT)
+    type = models.CharField(max_length=50, choices=TYPE_CHOICES)
+    voice = models.ForeignKey(LocalStorage, on_delete=models.PROTECT, blank=True, null=True, default=None)
+    text = models.TextField(blank=True, null=True, default=None)
     create_time = models.DateTimeField(_('Create Time'), auto_now_add=True)
 
     class Meta:
@@ -132,6 +154,8 @@ class WorksQuestionReply(models.Model):
         data['user'] = self.works_question.to.to_dict()
         data['works_question'] = self.works_question_id
         data['is_pay'] = self.works_question.is_pay
-        data['voice'] = self.voice.details()
+        data['type'] = self.type
+        data['text'] = self.text
+        data['voice'] = self.voice.details() if self.voice else None
         data['create_time'] = self.create_time
         return data

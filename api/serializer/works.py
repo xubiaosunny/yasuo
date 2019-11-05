@@ -18,10 +18,10 @@ class WorksSerializer(serializers.ModelSerializer):
 class WorksCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorksComment
-        fields = ('voice', )
+        fields = ('voice', 'type', 'text')
 
     def validate_voice(self, value):
-        if not value.type.startswith('audio'):
+        if value and not value.type.startswith('audio'):
             raise serializers.ValidationError(_('The file type is incorrect, Please upload an audio'))
         return value
 
@@ -56,9 +56,9 @@ class WorksAndQuestionSerializer(serializers.ModelSerializer):
 class WorksQuestionReplySerializer(serializers.ModelSerializer):
     class Meta:
         model = WorksQuestionReply
-        fields = ('voice', )
+        fields = ('voice', 'type', 'text')
 
     def validate_voice(self, value):
-        if not value.type.startswith('audio'):
+        if value and not value.type.startswith('audio'):
             raise serializers.ValidationError(_('The file type is incorrect, Please upload an audio'))
         return value

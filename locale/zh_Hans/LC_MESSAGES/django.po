@@ -191,3 +191,9 @@ msgstr "简介"
 
 msgid "Push Time"
 msgstr "推送时间"
+
+msgid "text"
+msgstr "文本"
+
+msgid "voice"
+msgstr "语音"
