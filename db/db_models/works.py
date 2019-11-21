@@ -23,7 +23,7 @@ class Works(models.Model):
     storage = models.ForeignKey(LocalStorage, on_delete=models.PROTECT)
     title = models.CharField(_('Title'), max_length=50, default='', blank=True)
     summary = models.TextField(_('Summary'), default='', blank=True)
-    favorite = models.ManyToManyField(CustomUser, related_name='favorite_works')
+    favorite = models.ManyToManyField(CustomUser, related_name='favorite_works', blank=True)
     location = models.CharField(_('Location'), max_length=50, null=True, blank=True, db_index=True)
     create_time = models.DateTimeField(_('Create Time'), auto_now_add=True)
     is_private = models.BooleanField(default=False)
