@@ -53,7 +53,7 @@ class CloopenSMS():
         return req.json()
 
     def send_code(self, phone, code):
-        res = self._send_sms(199869, [phone], [code, '5'])
+        res = self._send_sms(SMS_CLOOPEN.get('verification_code_template_id'), [phone], [code, '5'])
         if res['statusCode'] != '000000':
             raise CloopenStatusCodeException('%s:%s' % (res['statusCode'], res['statusMsg']))
 
