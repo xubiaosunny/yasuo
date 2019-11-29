@@ -3,10 +3,11 @@ from django.contrib.auth.models import Group
 from django.utils.translation import gettext_lazy as _
 
 from .models import CustomUser, SMSCode, LocalStorage, Works, WorksComment, WorksQuestion, WorksQuestionReply, \
-    Certification, Message
+    Certification, Message, AppUpdateLog
 from .db_admin.auth import UserAdmin, SMSCodeAdmin, CertificationAdmin, MessageAdmin
 from .db_admin.storage import LocalStorageAdmin
 from .db_admin.works import WorksAdmin, WorksCommentAdmin, WorksQuestionAdmin, WorksQuestionReplyAdmin
+from .db_admin.system import AppUpdateLogAdmin
 
 
 admin.site.site_title = _("YiQiPing")
@@ -27,6 +28,8 @@ admin.site.register(Works, WorksAdmin)
 admin.site.register(WorksComment, WorksCommentAdmin)
 admin.site.register(WorksQuestion, WorksQuestionAdmin)
 admin.site.register(WorksQuestionReply, WorksQuestionReplyAdmin)
+
+admin.site.register(AppUpdateLog, AppUpdateLogAdmin)
 
 # ... and, since we're not using Django's built-in permissions,
 # unregister the Group model from admin.

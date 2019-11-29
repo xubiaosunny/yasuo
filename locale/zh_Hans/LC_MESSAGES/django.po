@@ -197,3 +197,21 @@ msgstr "文本"
 
 msgid "voice"
 msgstr "语音"
+
+msgid "Source"
+msgstr "来源"
+
+msgid "Name"
+msgstr "名称"
+
+msgid "Version"
+msgstr "版本"
+
+msgid "Is Force"
+msgstr "是否强制"
+
+msgid "Describe"
+msgstr "描述"
+
+msgid "Update"
+msgstr "更新"

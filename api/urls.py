@@ -1,6 +1,6 @@
 from django.urls import path
 
-from api.views import auth, user, storage, works, home, pay
+from api.views import auth, user, storage, works, home, pay, system
 
 urlpatterns = [
     path('auth/send_sms_code/', auth.SendCodeView.as_view()),
@@ -46,5 +46,9 @@ urlpatterns = [
     path('order/extract_notify/', pay.AliExtractPayNotifyView.as_view()),
     path('order/payment_record', pay.PayInfo.as_view()),
     path('order/cash_withdrawal', pay.ExtractPayInfo.as_view()),
+
+    # system
+    path('system/app_update_log/', system.AppUpdateLogView.as_view()),
+    path('system/app_update_log/last/', system.AppUpdateLogLastView.as_view()),
 
 ]
