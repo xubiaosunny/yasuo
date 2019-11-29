@@ -10,7 +10,7 @@ class AppUpdateLogView(generics.GenericAPIView):
 
     def get(self, request):
         """
-        获取最新更新列表
+        获取所有更新列表
 
         > 参数`source`: ios, android
         """
@@ -27,7 +27,7 @@ class AppUpdateLogLastView(generics.GenericAPIView):
 
     def get(self, request):
         """
-        获取最新更新列表
+        获取最新一条更新
 
         > 参数`source`: ios, android
         """
