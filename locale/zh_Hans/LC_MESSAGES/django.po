@@ -215,3 +215,15 @@ msgstr "描述"
 
 msgid "Update"
 msgstr "更新"
+
+msgid "Listen Comment"
+msgstr "收听评论"
+
+msgid "Listen Reply"
+msgstr "收听回复"
+
+msgid "Is Effective"
+msgstr "是否生效"
+
+msgid "Price Settings"
+msgstr "价格设置"

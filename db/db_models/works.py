@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.conf import settings
+from .system import PriceSettings
 
 
 __all__ = ['Works', 'WorksComment', 'WorksQuestion', 'WorksQuestionReply']
@@ -101,6 +102,7 @@ class WorksComment(models.Model):
         data['create_time'] = self.create_time
         data['update_time'] = self.update_time
         data['can_question'] = self.is_pay and WorksQuestion.objects.filter(works=self.works, to=self.user).count() == 0
+        data['price'] = PriceSettings.current_price().listen_comment
         return data
 
 
@@ -158,4 +160,5 @@ class WorksQuestionReply(models.Model):
         data['text'] = self.text
         data['voice'] = self.voice.details() if self.voice else None
         data['create_time'] = self.create_time
+        data['price'] = PriceSettings.current_price().listen_reply
         return data
