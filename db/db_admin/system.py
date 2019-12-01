@@ -6,4 +6,4 @@ class AppUpdateLogAdmin(admin.ModelAdmin):
 
 
 class PriceSettingsAdmin(admin.ModelAdmin):
-    list_display = '__all__'
+    list_display = ('id', 'listen_comment', 'listen_reply', 'is_effective')
